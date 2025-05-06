@@ -115,6 +115,8 @@ build_compiler:
 	go mod edit -replace=$(REPO)/pkg/_out/functions@v0.0.0-unpublished=./pkg/_out/functions
 	go build -o $(CATALOG) $(CATALOG_DIR)/main.go
 	go build -o $(COMPILER) $(COMPILER_DIR)/main.go
+	go build -o cmd/throttle/throttle cmd/throttle/main.go
+	go build -o cmd/datagen/generator cmd/datagen/main.go
 
 build_engine:
 	@cat $(CATALOGJ_MASTER) | $(CATALOG) -i json -o capnp -t $(CSV_TEMPLATE_DIR) 2>> $(LOG) > $(CATALOGB)
@@ -163,6 +165,8 @@ clean:
 	rm -f $(CATALOG)
 	rm -f $(COMPILER)
 	rm -f $(ENGINE)
+	rm -f cmd/datagen/generator
+	rm -f cmd/throttle/throttle
 	rm -f go.mod
 	rm -f go.sum
 	rm -f go.work.sum
