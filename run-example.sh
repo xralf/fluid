@@ -17,15 +17,11 @@ JOB_LOG=${JOB}/fluid.log
 rm -rf ${JOBS_DIR}
 mkdir -p ${JOBS_DIR}
 cp -r ${TEMPLATE} ${JOBS_DIR}
+
 JOB_DIR=${JOB} make build
 
 cp -f cmd/throttle/throttle ${JOB}
 cp -f cmd/datagen/generator ${JOB}
 
 cd ${JOB}; ./prep.sh
-
-# #@cat ${JOB_DATA} | ${THROTTLE} --milliseconds 100 --append-timestamp false | ${JOB_ENGINE} -p ${JOB_PLANB} -x ${EXIT_AFTER_SECONDS} 2>> ${JOB_LOG}
 cat ${JOB_DATA} | ${THROTTLE} --milliseconds 100 --append-timestamp false | ${JOB_ENGINE} -p ${JOB_PLANB} -x ${EXIT_AFTER_SECONDS} 2>> ${JOB_LOG}
-
-#cd /tmp/jobs/synthetic-slice-time-live
-#cat sample.csv | ./throttle -milliseconds 100 --append-timestamp false | ./fluid -p ./plan.bin -x 3600
