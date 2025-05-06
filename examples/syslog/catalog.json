@@ -1,0 +1,59 @@
+{
+  "id": 0,
+  "name": "instance1",
+  "databases": [
+    {
+      "id": 1,
+      "name": "database1",
+      "schemas": [
+        {
+          "id": 1,
+          "name": "schema1",
+          "tables": [
+            {
+              "id": 1,
+              "name": "syslog",
+              "fields": [
+                {
+                  "id": 0,
+                  "name": "t",
+                  "type": "timestamp",
+                  "description": "RFC3339Nano format",
+                  "usage": "time"
+                },
+                {
+                  "id": 1,
+                  "name": "pid",
+                  "description": "Process ID",
+                  "type": "integer64",
+                  "usage": "group"
+                },
+                {
+                  "id": 2,
+                  "name": "sub",
+                  "description": "Subsystem",
+                  "type": "text",
+                  "usage": "data"
+                },
+                {
+                  "id": 3,
+                  "name": "mtype",
+                  "description": "Message type",
+                  "type": "text",
+                  "usage": "data"
+                },
+                {
+                  "id": 4,
+                  "name": "path",
+                  "description": "Process image path",
+                  "type": "text",
+                  "usage": "data"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

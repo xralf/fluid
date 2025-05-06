@@ -1,0 +1,6 @@
+from instance1.database1.schema1.table1
+group by symbol
+window slice 2 seconds
+aggregate count(ts) as trades, avg(price) as pavg
+append trades, pavg
+to instance1.database1.schema1.result1

@@ -1,0 +1,81 @@
+{
+  "id": 0,
+  "name": "instance1",
+  "databases": [
+    {
+      "id": 1,
+      "name": "database1",
+      "schemas": [
+        {
+          "id": 1,
+          "name": "schema1",
+          "tables": [
+            {
+              "id": 1,
+              "name": "table1",
+              "fields": [
+                {
+                  "id": 0,
+                  "name": "ts",
+                  "type": "timestamp",
+                  "description": "time of trade",
+                  "usage": "time"
+                },
+                {
+                  "id": 1,
+                  "name": "symbol",
+                  "description": "currency name",
+                  "type": "text",
+                  "usage": "data"
+                },
+                {
+                  "id": 2,
+                  "name": "price",
+                  "type": "float64",
+                  "usage": "data"
+                },
+                {
+                  "id": 3,
+                  "name": "volume",
+                  "type": "float64",
+                  "usage": "data"
+                }
+              ]
+            },
+            {
+              "id": 1,
+              "name": "result1",
+              "fields": [
+                {
+                  "id": 0,
+                  "name": "trades",
+                  "type": "integer64",
+                  "usage": "data"
+                },
+                {
+                  "id": 1,
+                  "name": "pavg",
+                  "type": "float64",
+                  "usage": "data"
+                },
+                {
+                  "id": 2,
+                  "name": "pmin",
+                  "type": "float64",
+                  "usage": "data"
+                },
+                {
+                  "id": 3,
+                  "name": "symbol",
+                  "description": "group field",
+                  "type": "text",
+                  "usage": "data"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

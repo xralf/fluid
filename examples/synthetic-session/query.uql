@@ -1,0 +1,10 @@
+from instance1.database1.schema1.table1
+group by g2, g1
+window session
+  begin when c == "a" or c == "b" or c == "c"
+  end   when c == "x" or c == "y" or c == "z" inclusive
+  expire after 5 seconds
+aggregate count(a) as aCount, avg(a) as aAvg, avg(b) as bAvg, sum(a) as aSum, first(c) as cFirst, last(c) as cLast, first(t2) as t2First, last(t2) as t2Last, first(rowid) as rowidFirst, last(rowid) as rowidLast, count(one) as oneCount, sum(one) as oneSum
+append t2First, t2Last, aCount, aSum, aAvg, bAvg, oneCount, oneSum, cFirst, cLast, rowidFirst, rowidLast
+where bAvg > 50
+to instance1.database1.schema1.table2

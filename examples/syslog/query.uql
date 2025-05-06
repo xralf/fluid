@@ -1,0 +1,6 @@
+from instance1.database1.schema1.syslog
+group by pid
+window slice 3 seconds
+aggregate first(t) as tStart, last(t) as tStop, count(t) as tCount
+append tStart, tStop, tCount
+to instance1.database1.schema1.table0
