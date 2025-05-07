@@ -94,6 +94,18 @@ func init() {
 	randGenerator = rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
+func Generate(catalogName string, tableName string, numRows int) {
+	fieldNames, fieldTypes, fieldUsages, csvTypes, maxValues := extractFieldInfo(catalogName, tableName)
+	preamble := "# " + strings.Join(fieldNames, ", ") +
+		"\n# " + strings.Join(fieldTypes, ", ") +
+		"\n# " + strings.Join(csvTypes, ", ") +
+		"\n# " + strings.Join(AsText(maxValues), ", ") + "\n"
+
+	data := [][]string{}
+	createData(fieldNames, fieldUsages, csvTypes, maxValues, numRows, &data)
+	writeData(preamble, data)
+}
+
 func AsText(values []int) (result []string) {
 	for _, v := range values {
 		result = append(result, strconv.Itoa(v))
@@ -101,7 +113,7 @@ func AsText(values []int) (result []string) {
 	return
 }
 
-func CreateData(fieldNames []string, fieldUsages []string, csvTypeNames []string, maxValues []int, numRows int, data *[][]string) {
+func createData(fieldNames []string, fieldUsages []string, csvTypeNames []string, maxValues []int, numRows int, data *[][]string) {
 	ts := time.Date(2024, 1, 1, 0, 0, 0, 0, time.Local) // New Year's midnight
 
 	zipfGenerators := make([]*rand.Zipf, len(maxValues))
@@ -123,7 +135,7 @@ func CreateData(fieldNames []string, fieldUsages []string, csvTypeNames []string
 			case CsvTypeBoolean:
 				value = strconv.FormatBool(rand.Intn(max) == 1)
 			case CsvTypeFloat:
-				value = fmt.Sprintf("%.2f", RandomFloat(0, max))
+				value = fmt.Sprintf("%.2f", randomFloat(0, max))
 			case CsvTypeInteger:
 				if fieldNames[n] == "one" {
 					value = strconv.Itoa(1) // for experiments of counts
@@ -142,7 +154,7 @@ func CreateData(fieldNames []string, fieldUsages []string, csvTypeNames []string
 				} else if fieldUsages[n] == common.FieldUsageTime {
 					value = fmt.Sprint(ts.Add(100 * time.Millisecond * time.Duration(i)).Format(time.RFC3339Nano))
 				} else {
-					value = RandomString(max)
+					value = randomString(max)
 				}
 			case CsvTypeTimestamp:
 				value = fmt.Sprint(ts.Add(10 * time.Millisecond * time.Duration(i)).Format(time.RFC3339Nano))
@@ -155,7 +167,7 @@ func CreateData(fieldNames []string, fieldUsages []string, csvTypeNames []string
 	}
 }
 
-func WriteData(preamble string, rows [][]string) {
+func writeData(preamble string, rows [][]string) {
 	fmt.Print(preamble)
 	csvFile := os.Stdout
 	writer := csv.NewWriter(csvFile)
@@ -169,7 +181,7 @@ func WriteData(preamble string, rows [][]string) {
 	writer.Flush()
 }
 
-func ExtractFieldInfo(catalogFileName string, dotTableName string) (fieldNames []string, fieldTypes []string, fieldUsages []string, csvTypes []string, maxValues []int) {
+func extractFieldInfo(catalogFileName string, dotTableName string) (fieldNames []string, fieldTypes []string, fieldUsages []string, csvTypes []string, maxValues []int) {
 	table, err := findTable(catalogFileName, dotTableName)
 	if err != nil {
 		panic(err)
@@ -272,15 +284,15 @@ func findTable(fileName string, dotTableName string) (table Table, err error) {
 	return tables[i], nil
 }
 
-func RandomFloat(min int, max int) float32 {
+func randomFloat(min int, max int) float32 {
 	return float32(min) + rand.Float32()*float32(max-min)
 }
 
-func RandomString(length int) string {
-	return StringWithCharset(length, charset)
+func randomString(length int) string {
+	return stringWithCharset(length, charset)
 }
 
-func StringWithCharset(length int, charset string) string {
+func stringWithCharset(length int, charset string) string {
 	b := make([]byte, length)
 	for i := range b {
 		b[i] = charset[seededRand.Intn(len(charset))]
