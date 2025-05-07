@@ -63,20 +63,15 @@ else
 ANTLR4                 := "Unknown operating system name: $(OS_NAME)"
 endif
 
-all: example
+all: build
 
-example: example_prep build example_datagen example_run
+example: build generate run
 
-example_prep:
-	rm -rf $(JOBS_PATH)
-	mkdir -p $(JOBS_PATH)
-	cp -r $(EXAMPLE_TEMPLATE) $(JOBS_PATH)
-
-example_datagen:
+generate:
 	cp -f cmd/datagen/generator $(JOB_PATH)
 	cd $(JOB_PATH); ./prep.sh
 
-example_run:
+run:
 	@cat $(JOB_DATA) | $(THROTTLE) --milliseconds 100 --append-timestamp false | $(ENGINE) -p $(PLANB) -x $(EXIT_AFTER_SECONDS) 2>> $(LOG)
 
 build: clean prepare build_compiler build_engine build_datagen build_throttle
@@ -100,6 +95,8 @@ mini_build:
 	go build -o $(COMPILER) $(COMPILER_PATH)/main.go
 
 prepare:
+	mkdir -p $(JOBS_PATH)
+	cp -r $(EXAMPLE_TEMPLATE) $(JOBS_PATH)
 	mkdir -p $(JOB_PATH)
 	mkdir -p $(CAPNP_PATH)
 	mkdir -p $(OUT_PATH)
@@ -155,7 +152,7 @@ build_engine:
 build_throttle:
 	go build -o cmd/throttle/throttle cmd/throttle/main.go
 
-run:
+run2:
 #	@cat $(TABLE_NAME_CSV) | $(ENGINE) -p $(PLANB) 2>> $(LOG)
 #	@cat $(JOB_DATA) | $(THROTTLE) --milliseconds 100 --append-timestamp false | $(ENGINE) -p $(PLANB) -x $(EXIT_AFTER_SECONDS) 2>> $(LOG)
 	@cat $(JOB_DATA) | $(THROTTLE) --milliseconds 100 --append-timestamp false | $(JOB_ENGINE) -p $(JOB_PLANB) -x $(EXIT_AFTER_SECONDS) 2>> $(JOB_LOG)
@@ -190,6 +187,7 @@ clean:
 	rm -f go.mod
 	rm -f go.sum
 	rm -f go.work.sum
+	rm -rf $(JOBS_PATH)
 	rm -rf $(PKG_OUT_PATH)
 	rm -rf $(CAPNP_PATH)/go-capnproto2
 	rm -rf $(OUT_PATH)
