@@ -11,7 +11,7 @@ func Throttle(sleepMilliseconds int, appendTimestamp bool, delimiter string) {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if err = scanner.Err(); err != nil {
+		if err := scanner.Err(); err != nil {
 			panic(err)
 		}
 
