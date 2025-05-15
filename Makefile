@@ -35,7 +35,7 @@ PLAN_PATH              := $(OUT_PATH)
 CATALOG_OUT_PATH       := $(OUT_PATH)/catalog
 CSV_DATA_PATH          := $(OUT_PATH)/csv_data
 CSV_TEMPLATE_PATH      := $(OUT_PATH)/csv_templates
-EXAMPLE_QUERY_PATH     := $(JOB_PATH)/query.uql
+EXAMPLE_QUERY_PATH     := $(JOB_PATH)/query.fql
 TEMPLATE_PATH          := templates
 
 LOG                    := fluid.log
@@ -47,7 +47,7 @@ PLANJ                  := $(PLAN_PATH)/plan.json
 #TABLE_NAME             := $(shell head -1 $(EXAMPLE_QUERY_PATH) | awk '{print $$2}')
 
 ANTLRGEN               := BaseListener Lexer Listener Parser
-GRAMMAR_QUERY          := UQL
+GRAMMAR_QUERY          := FQL
 OS_NAME                := $(shell uname -s)
 
 CATALOG                := $(CATALOG_PATH)/catalog
@@ -129,9 +129,6 @@ build_compiler:
 	go build -o $(CATALOG) $(CATALOG_PATH)/main.go
 	go build -o $(COMPILER) $(COMPILER_PATH)/main.go
 
-build_datagen:
-	go build -o cmd/datagen/generator cmd/datagen/main.go
-
 build_engine:
 	@cat $(CATALOGJ_MASTER) | $(CATALOG) -i json -o capnp -t $(CSV_TEMPLATE_PATH) 2>> $(LOG) > $(CATALOGB)
 #	@cat $(CATALOGB) | $(CATALOG) -i capnp -o jmson -t $(CSV_TEMPLATE_PATH) 2>> $(LOG) | tee $(CATALOGJ) | jq '.' --tab
@@ -148,6 +145,9 @@ build_engine:
 	go build -o $(ENGINE) $(ENGINE_PATH)/main.go
 	cp $(ENGINE) $(JOB_PATH)
 	go mod tidy
+
+build_datagen:
+	go build -o cmd/datagen/generator cmd/datagen/main.go
 
 build_throttle:
 	go build -o cmd/throttle/throttle cmd/throttle/main.go

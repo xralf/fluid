@@ -29,7 +29,7 @@ sudo apt-get install autoconf
 sudo apt-get install libtool
 autoreconf -i
 ./configure
-make -j4 check
+make -j3 check
 sudo make install
 ```
 
@@ -57,15 +57,15 @@ make fluid
 make syslog-example
 ```
 
-- `make fluidc` creates the compiler that is based on the UQL grammar described below. The command is used to translate a UQL query into a file with the query execution plan.
+- `make fluidc` creates the compiler that is based on the FQL grammar described below. The command is used to translate a FQL query into a file with the query execution plan.
 
 - `make fluid` creates the engine. It uses the plan file created by `fluidc` and waits for data on `stdin` that is compatible with the schema named in the query's `from` clause as defined in the `catalog.json` file described below.
 
-- `make syslog-example` runs a simple UQL query over live `syslog` data on your system (Linux or MacOS).
+- `make syslog-example` runs a simple FQL query over live `syslog` data on your system (Linux or MacOS).
 
 ## Example
 
-With the _fluid-portal Query Language_ (UQL) we can specify a task in an intuitve manner. Imagine, we want to process time-stamped CSV data like the following from the file [foo.csv](data/foo.csv):
+With the _fluid-portal Query Language_ (FQL) we can specify a task in an intuitve manner. Imagine, we want to process time-stamped CSV data like the following from the file [foo.csv](data/foo.csv):
 
 |   x |             t             |
 | --: | :-----------------------: |
@@ -236,7 +236,7 @@ If this clause is present, it specifies the field used to divide the flow of tim
 
 ### The `to` clause
 
-On a high level, a UQL query consists of the following clauses that are named by its first keyword.
+On a high level, a FQL query consists of the following clauses that are named by its first keyword.
 
 - `every` specifies the window size and how the window moves along the input data.
 - `from` references the input schema in the [catalog.json](cmd/catalog/catalog.json) file.

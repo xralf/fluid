@@ -1,5 +1,5 @@
 //
-// This program translates a UQL query string and generates
+// This program translates a FQL query string and generates
 //
 //   1. A text Cap'n Proto file (plan.capnp) with the schema (mostly fields and types) of
 //      each node in the query plan.
@@ -8,13 +8,13 @@
 //
 // There are 2 different parameters:
 //
-//   1. compile:  Given a UQL query, generate the binary query plan
+//   1. compile:  Given a FQL query, generate the binary query plan
 //
 //   2. show:     Given a binary query plan, generate a JSON representation of the query plan
 //
 // Compilation:
 //
-// stdin (UQL query)  --->  ./fluidc compile  -+->  stdout (binary Cap'n Proto stream)
+// stdin (FQL query)  --->  ./fluidc compile  -+->  stdout (binary Cap'n Proto stream)
 //                                               |
 //                                               +->  file with Cap'n Proto schemas (schemas.capnp)
 //                                                    (this file is a side effect)
@@ -94,7 +94,7 @@ var (
 )
 
 type queryListener struct {
-	*parser.BaseUQLListener
+	*parser.BaseFQLListener
 
 	queryPlan QueryPlan
 
@@ -389,10 +389,10 @@ func parseQuery(msg *capnp.Message, seg *capnp.Segment, query string) fluid.Node
 	}
 
 	is := antlr.NewInputStream(query)
-	lexer := parser.NewUQLLexer(is)
+	lexer := parser.NewFQLLexer(is)
 	tokenStream := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
 
-	parser := parser.NewUQLParser(tokenStream)
+	parser := parser.NewFQLParser(tokenStream)
 
 	NewQueryPlanTemplate(seg, msg, &listener.queryPlan)
 	antlr.ParseTreeWalkerDefault.Walk(&listener, parser.Start_())
@@ -457,9 +457,9 @@ func (l *queryListener) ExitConnection(c *parser.ConnectionContext) {
 	t.Kind = right.Kind
 
 	switch c.GetOp().GetTokenType() {
-	case parser.UQLParserAND:
+	case parser.FQLParserAND:
 		t.Code = left.Code + " && " + right.Code
-	case parser.UQLParserOR:
+	case parser.FQLParserOR:
 		t.Code = left.Code + " || " + right.Code
 	default:
 		panic(fmt.Errorf("unexpected op: %s", c.GetOp().GetText()))
@@ -491,11 +491,11 @@ func (l *queryListener) ExitMulDivMod(c *parser.MulDivModContext) {
 
 	var code string
 	switch c.GetOp().GetTokenType() {
-	case parser.UQLParserMUL:
+	case parser.FQLParserMUL:
 		code = left.Code + " * " + right.Code
-	case parser.UQLParserDIV:
+	case parser.FQLParserDIV:
 		code = left.Code + " / " + right.Code
-	case parser.UQLParserMOD:
+	case parser.FQLParserMOD:
 		code = left.Code + " % " + right.Code
 	default:
 		panic(fmt.Sprintf("unexpected op: %s", c.GetOp().GetText()))
@@ -524,9 +524,9 @@ func (l *queryListener) ExitAddSub(c *parser.AddSubContext) {
 		kind = right.Kind
 
 		switch c.GetOp().GetTokenType() {
-		case parser.UQLParserADD:
+		case parser.FQLParserADD:
 			code = left.Code + " + " + right.Code
-		case parser.UQLParserSUB:
+		case parser.FQLParserSUB:
 			code = left.Code + " - " + right.Code
 		default:
 			panic(fmt.Sprintf("unexpected op: %s", c.GetOp().GetText()))
@@ -544,9 +544,9 @@ func timeAddSub(token antlr.Token, timestamp string, duration string) (code stri
 	var method string
 
 	switch token.GetTokenType() {
-	case parser.UQLParserADD:
+	case parser.FQLParserADD:
 		method = "Add"
-	case parser.UQLParserSUB:
+	case parser.FQLParserSUB:
 		method = "Sub"
 	default:
 		panic(fmt.Sprintf("unexpected op: %s", token.GetText()))
@@ -560,17 +560,17 @@ func timeCompare(token antlr.Token, timestamp1 string, timetamp2 string) (code s
 	var cmp string
 
 	switch token.GetTokenType() {
-	case parser.UQLParserLT:
+	case parser.FQLParserLT:
 		cmp = " == -1"
-	case parser.UQLParserLT_EQ:
+	case parser.FQLParserLT_EQ:
 		cmp = " <= 0"
-	case parser.UQLParserEQ:
+	case parser.FQLParserEQ:
 		cmp = " == 0"
-	case parser.UQLParserNOT_EQ:
+	case parser.FQLParserNOT_EQ:
 		cmp = " != 0"
-	case parser.UQLParserGT_EQ:
+	case parser.FQLParserGT_EQ:
 		cmp = " >= 0"
-	case parser.UQLParserGT:
+	case parser.FQLParserGT:
 		cmp = " > 0"
 	default:
 		panic(fmt.Sprintf("unexpected comparison operator: %s", token.GetText()))
@@ -583,17 +583,17 @@ func defaultCompare(token antlr.Token, left string, right string) (code string) 
 	var cmp string
 
 	switch token.GetTokenType() {
-	case parser.UQLParserLT:
+	case parser.FQLParserLT:
 		cmp = " < "
-	case parser.UQLParserLT_EQ:
+	case parser.FQLParserLT_EQ:
 		cmp = " <= "
-	case parser.UQLParserEQ:
+	case parser.FQLParserEQ:
 		cmp = " == "
-	case parser.UQLParserNOT_EQ:
+	case parser.FQLParserNOT_EQ:
 		cmp = " != "
-	case parser.UQLParserGT_EQ:
+	case parser.FQLParserGT_EQ:
 		cmp = " >= "
-	case parser.UQLParserGT:
+	case parser.FQLParserGT:
 		cmp = " > "
 	default:
 		panic(fmt.Sprintf("unexpected comparison operator: %s", token.GetText()))
@@ -917,9 +917,9 @@ func (l *queryListener) ExitSessionClose(ctx *parser.SessionCloseContext) {
 
 	var sessionCloseInclusive string
 	switch ctx.GetClusivity().GetTokenType() {
-	case parser.UQLParserINCLUSIVE:
+	case parser.FQLParserINCLUSIVE:
 		sessionCloseInclusive = "true"
-	case parser.UQLParserEXCLUSIVE:
+	case parser.FQLParserEXCLUSIVE:
 		sessionCloseInclusive = "false"
 	default:
 		panic(fmt.Errorf("unexpected clusivity: %s", ctx.GetClusivity().GetText()))

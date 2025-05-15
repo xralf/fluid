@@ -1,4 +1,4 @@
-// This program translates a UQL query string and generates
+// This program translates a FQL query string and generates
 //
 //   1. A text Cap'n Proto file (plan.capnp) with the schema (mostly fields and types) of
 //      each node in the query plan.
@@ -7,13 +7,13 @@
 //
 // There are 2 different parameters:
 //
-//   1. compile:  Given a UQL query, generate the binary query plan
+//   1. compile:  Given a FQL query, generate the binary query plan
 //
 //   2. show:     Given a binary query plan, generate a JSON representation of the query plan
 //
 // Compilation:
 //
-// stdin (UQL query)  --->  ./compiler compile  --->  stdout (binary Cap'n Proto stream)
+// stdin (FQL query)  --->  ./compiler compile  --->  stdout (binary Cap'n Proto stream)
 //                                               |
 //                                               +->  file with Cap'n Proto schemas (schemas.capnp)
 //                                                    (this file is a side effect)

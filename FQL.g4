@@ -1,4 +1,4 @@
-grammar UQL;
+grammar FQL;
 
 ADD:           '+';
 SUB:           '-';

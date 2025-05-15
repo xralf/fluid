@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/#!/usr/bin/env bash
 
 EXAMPLE=synthetic-slice-time-live
 
@@ -18,7 +18,7 @@ rm -rf ${JOBS_DIR}
 mkdir -p ${JOBS_DIR}
 cp -r ${TEMPLATE} ${JOBS_DIR}
 
-JOB_DIR=${JOB} make build
+JOB_PATH=${JOB} make build
 
 cp -f cmd/throttle/throttle ${JOB}
 cp -f cmd/datagen/generator ${JOB}
