@@ -125,7 +125,7 @@ func (c *Catalog) ReadCapnp() {
 		panic(err)
 	}
 
-	for i := 0; i < databases.Len(); i++ {
+	for i := range databases.Len() {
 		var d Database
 		d.Id = databases.At(i).Id()
 		if d.Name, err = databases.At(i).Name(); err != nil {
@@ -136,7 +136,7 @@ func (c *Catalog) ReadCapnp() {
 			panic(err)
 		}
 
-		for j := 0; j < schemas.Len(); j++ {
+		for j := range schemas.Len() {
 			var s Schema
 			s.Id = schemas.At(j).Id()
 			if s.Name, err = schemas.At(j).Name(); err != nil {
@@ -147,7 +147,7 @@ func (c *Catalog) ReadCapnp() {
 				panic(err)
 			}
 
-			for k := 0; k < tables.Len(); k++ {
+			for k := range tables.Len() {
 				var t Table
 				t.Id = tables.At(k).Id()
 				if t.Name, err = tables.At(k).Name(); err != nil {
@@ -158,7 +158,7 @@ func (c *Catalog) ReadCapnp() {
 					panic(err)
 				}
 
-				for l := 0; l < fields.Len(); l++ {
+				for l := range fields.Len() {
 					var f Field
 					if f.Name, err = fields.At(l).Name(); err != nil {
 						panic(err)
@@ -356,7 +356,7 @@ func FindTable(path string, fullTableName string) (msg *capnp.Message, table flu
 		panic(err)
 	}
 
-	for i := 0; i < databases.Len(); i++ {
+	for i := range databases.Len() {
 		var d Database
 		if d.Name, err = databases.At(i).Name(); err != nil {
 			panic(err)
@@ -370,7 +370,7 @@ func FindTable(path string, fullTableName string) (msg *capnp.Message, table flu
 			panic(err)
 		}
 
-		for j := 0; j < schemas.Len(); j++ {
+		for j := range schemas.Len() {
 			var s Schema
 			if s.Name, err = schemas.At(j).Name(); err != nil {
 				panic(err)
@@ -384,7 +384,7 @@ func FindTable(path string, fullTableName string) (msg *capnp.Message, table flu
 				panic(err)
 			}
 
-			for k := 0; k < tables.Len(); k++ {
+			for k := range tables.Len() {
 				var t Table
 				if t.Name, err = tables.At(k).Name(); err != nil {
 					panic(err)
@@ -411,7 +411,7 @@ func FindField(path string, fullTableName string, fieldName string) (msg *capnp.
 		return
 	}
 
-	for i := 0; i < fields.Len(); i++ {
+	for i := range fields.Len() {
 		field = fields.At(i)
 		var name string
 		if name, err = field.Name(); err != nil {

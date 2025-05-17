@@ -124,7 +124,7 @@ func createData(fieldNames []string, fieldUsages []string, csvTypeNames []string
 		}
 	}
 
-	for i := 0; i < numRows; i++ {
+	for i := range numRows {
 		var row []string
 		for n, name := range csvTypeNames {
 			max := maxValues[n]
@@ -248,7 +248,7 @@ func findTable(fileName string, dotTableName string) (table Table, err error) {
 	var i int
 	databases := catalog.Databases
 	n := len(databases)
-	for i = 0; i < n; i++ {
+	for i = range n {
 		if databases[i].Name == databaseName {
 			break
 		}
@@ -259,7 +259,7 @@ func findTable(fileName string, dotTableName string) (table Table, err error) {
 
 	schemas := databases[i].Schemas
 	n = len(schemas)
-	for i = 0; i < n; i++ {
+	for i = range n {
 		if schemas[i].Name == schemaName {
 			break
 		}
@@ -270,7 +270,7 @@ func findTable(fileName string, dotTableName string) (table Table, err error) {
 
 	tables := schemas[i].Tables
 	n = len(tables)
-	for i = 0; i < n; i++ {
+	for i = range n {
 		if tables[i].Name == tableName {
 			break
 		}

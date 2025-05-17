@@ -363,7 +363,7 @@ func (e *Engine) LiveDistanceWindowWorker() {
 	maxRows := int(e.window.IntervalRows)
 	var window []*data.IngressRow
 	for {
-		for i := 0; i < maxRows; i++ {
+		for range maxRows {
 			ingressRow := <-e.ingressFilterToWindowChannel
 			window = append(window, ingressRow)
 		}

@@ -201,7 +201,7 @@ func GoInternalPayload(nodeName string, node *fluid.Node, operatorType fluid.Ope
 	}
 
 	var name string
-	for i := 0; i < fields.Len(); i++ {
+	for i := range fields.Len() {
 		if name, err = fields.At(i).Name(); err != nil {
 			panic(err)
 		}
@@ -231,7 +231,7 @@ func GoTranslate(nodeName string, node *fluid.Node, root *fluid.Node) (code stri
 	code += "func Translate" + nodeName + "Payload(in data." + nodeName + "Payload) (out Internal" + nodeName + "Payload) {\n"
 
 	var name string
-	for i := 0; i < fields.Len(); i++ {
+	for i := range fields.Len() {
 		if name, err = fields.At(i).Name(); err != nil {
 			panic(err)
 		}
@@ -352,7 +352,7 @@ func CapnpStructGroup(rootNode *fluid.Node, fields capnp.StructList[fluid.Field]
 	var name string
 	var err error
 	for i, fieldName := range fieldNames {
-		for j := 0; j < fields.Len(); j++ {
+		for j := range fields.Len() {
 			if name, err = fields.At(j).Name(); err != nil {
 				panic(err)
 			}
@@ -375,7 +375,7 @@ func CapnpStructIngressRow(rootNode *fluid.Node, fields capnp.StructList[fluid.F
 	code += "\nstruct IngressPayload {\n"
 	var name string
 	var err error
-	for i := 0; i < fields.Len(); i++ {
+	for i := range fields.Len() {
 		if name, err = fields.At(i).Name(); err != nil {
 			panic(err)
 		}
@@ -396,7 +396,7 @@ func CapnpStructAggregateRow(fields capnp.StructList[fluid.Field]) (code string)
 	code += "\tpayload @1 :AggregatePayload;\n"
 	code += "}\n"
 	code += "\nstruct AggregatePayload {\n"
-	for i := 0; i < fields.Len(); i++ {
+	for i := range fields.Len() {
 		field := fields.At(i)
 		var name string
 		var err error
@@ -416,7 +416,7 @@ func CapnpStructEgressRow(fields capnp.StructList[fluid.Field]) (code string) {
 	code += "\tpayload @1 :EgressPayload;\n"
 	code += "}\n"
 	code += "\nstruct EgressPayload {\n"
-	for i := 0; i < fields.Len(); i++ {
+	for i := range fields.Len() {
 		field := fields.At(i)
 		var name string
 		var err error
@@ -452,7 +452,7 @@ func CapnpFieldDeclaration(fieldName string, index int, fieldType fluid.FieldTyp
 	}
 
 	indentation := ""
-	for i := 0; i < indent; i++ {
+	for range indent {
 		indentation += "\t"
 	}
 
@@ -475,7 +475,7 @@ func FindCatalogFieldType(rootNode *fluid.Node, name string, operatorType fluid.
 	if fields, err = ingressNode.Fields(); err != nil {
 		panic(err)
 	}
-	for i := 0; i < fields.Len(); i++ {
+	for i := range fields.Len() {
 		field := fields.At(i)
 		var fieldName string
 		if fieldName, err = field.Name(); err != nil {

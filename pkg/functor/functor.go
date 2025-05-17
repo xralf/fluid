@@ -19,13 +19,13 @@ import (
 type Functor interface {
 	Init(typ *fluid.FieldType)
 	Reset()
-	Update(value interface{})
-	Value() interface{}
+	Update(value any)
+	Value() any
 }
 
 type First struct {
 	alreadySet bool
-	first      interface{}
+	first      any
 }
 
 func (f *First) Init(typ *fluid.FieldType) {
@@ -36,19 +36,19 @@ func (f *First) Reset() {
 	f.alreadySet = false
 }
 
-func (f *First) Update(value interface{}) {
+func (f *First) Update(value any) {
 	if !f.alreadySet {
 		f.alreadySet = true
 		f.first = value
 	}
 }
 
-func (f *First) Value() interface{} {
+func (f *First) Value() any {
 	return f.first
 }
 
 type Last struct {
-	Last interface{}
+	Last any
 }
 
 func (f *Last) Init(typ *fluid.FieldType) {
@@ -59,11 +59,11 @@ func (f *Last) Reset() {
 	// TODO: Nothing to do?
 }
 
-func (f *Last) Update(value interface{}) {
+func (f *Last) Update(value any) {
 	f.Last = value
 }
 
-func (f *Last) Value() interface{} {
+func (f *Last) Value() any {
 	return f.Last
 }
 
@@ -79,11 +79,11 @@ func (f *Counter) Reset() {
 	f.Count = 0
 }
 
-func (f *Counter) Update(ignoreMe interface{}) {
+func (f *Counter) Update(ignoreMe any) {
 	f.Count++
 }
 
-func (f *Counter) Value() interface{} {
+func (f *Counter) Value() any {
 	return float64(f.Count)
 }
 
@@ -103,7 +103,7 @@ func (f *Averager) Reset() {
 	f.Sum = 0
 }
 
-func (f *Averager) Update(value interface{}) {
+func (f *Averager) Update(value any) {
 	f.Count++
 	switch f.theType {
 	case fluid.FieldType_float64:
@@ -115,13 +115,13 @@ func (f *Averager) Update(value interface{}) {
 	}
 }
 
-func (f *Averager) Value() interface{} {
+func (f *Averager) Value() any {
 	return f.Sum / float64(f.Count)
 }
 
 type Minimizer struct {
 	TheType fluid.FieldType
-	Minimum interface{}
+	Minimum any
 }
 
 func (f *Minimizer) Init(typ *fluid.FieldType) {
@@ -142,7 +142,7 @@ func (f *Minimizer) Reset() {
 	}
 }
 
-func (f *Minimizer) Update(value interface{}) {
+func (f *Minimizer) Update(value any) {
 	switch f.TheType {
 	case fluid.FieldType_float64:
 		if value.(float64) < f.Minimum.(float64) {
@@ -165,7 +165,7 @@ func (f *Minimizer) Update(value interface{}) {
 	}
 }
 
-func (f *Minimizer) Value() interface{} {
+func (f *Minimizer) Value() any {
 	switch f.TheType {
 	case fluid.FieldType_float64:
 		if v, ok := f.Minimum.(float64); !ok {
@@ -186,7 +186,7 @@ func (f *Minimizer) Value() interface{} {
 
 type Maximizer struct {
 	TheType fluid.FieldType
-	Maximum interface{}
+	Maximum any
 }
 
 func (f *Maximizer) Init(typ *fluid.FieldType) {
@@ -205,7 +205,7 @@ func (f *Maximizer) Reset() {
 	}
 }
 
-func (f *Maximizer) Update(value interface{}) {
+func (f *Maximizer) Update(value any) {
 	switch f.TheType {
 	case fluid.FieldType_float64:
 		if value.(float64) > f.Maximum.(float64) {
@@ -228,13 +228,13 @@ func (f *Maximizer) Update(value interface{}) {
 	}
 }
 
-func (f *Maximizer) Value() interface{} {
+func (f *Maximizer) Value() any {
 	return f.Maximum
 }
 
 type NoOp struct {
 	TheType  fluid.FieldType
-	TheValue interface{}
+	TheValue any
 }
 
 func (f *NoOp) Init(typ *fluid.FieldType) {
@@ -245,7 +245,7 @@ func (f *NoOp) Init(typ *fluid.FieldType) {
 func (f *NoOp) Reset() {
 }
 
-func (f *NoOp) Update(value interface{}) {
+func (f *NoOp) Update(value any) {
 	switch f.TheType {
 	case fluid.FieldType_float64:
 		if value.(float64) < f.TheValue.(float64) {
@@ -268,7 +268,7 @@ func (f *NoOp) Update(value interface{}) {
 	}
 }
 
-func (f *NoOp) Value() interface{} {
+func (f *NoOp) Value() any {
 	switch f.TheType {
 	case fluid.FieldType_float64:
 		if v, ok := f.TheValue.(float64); !ok {
@@ -301,7 +301,7 @@ func (f *Summer) Reset() {
 	f.Sum = 0
 }
 
-func (f *Summer) Update(value interface{}) {
+func (f *Summer) Update(value any) {
 	switch f.TheType {
 	case fluid.FieldType_float64:
 		f.Sum += value.(float64)
@@ -312,7 +312,7 @@ func (f *Summer) Update(value interface{}) {
 	}
 }
 
-func (f *Summer) Value() interface{} {
+func (f *Summer) Value() any {
 	return f.Sum
 }
 
@@ -332,7 +332,7 @@ func (f *DistinctCounter) Reset() {
 	f.NumDistinct = 0
 }
 
-func (f *DistinctCounter) Update(value interface{}) {
+func (f *DistinctCounter) Update(value any) {
 	key := getHash(f.TheType, value)
 	if _, ok := f.Counts[key]; ok {
 		f.Counts[key]++
@@ -342,7 +342,7 @@ func (f *DistinctCounter) Update(value interface{}) {
 	}
 }
 
-func (f *DistinctCounter) Value() interface{} {
+func (f *DistinctCounter) Value() any {
 	return f.NumDistinct
 }
 
@@ -366,15 +366,15 @@ func (f *Uniquer) Reset() {
 	}
 }
 
-func (f *Uniquer) Update(value interface{}) {
+func (f *Uniquer) Update(value any) {
 	f.HLL.Add(getHash(f.TheType, value))
 }
 
-func (f *Uniquer) Value() interface{} {
+func (f *Uniquer) Value() any {
 	return f.HLL.Count()
 }
 
-func getHash(typ fluid.FieldType, value interface{}) (result uint32) {
+func getHash(typ fluid.FieldType, value any) (result uint32) {
 	hash := fnv.New32()
 
 	switch typ {

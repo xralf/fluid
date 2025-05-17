@@ -649,7 +649,7 @@ func (l *queryListener) ExitVariable(c *parser.VariableContext) {
 	foundVariable := false
 	isTimeType := false
 	variableName := c.GetText()
-	for i := 0; i < fields.Len(); i++ {
+	for i := range fields.Len() {
 		field := fields.At(i)
 		var name string
 		if name, err = field.Name(); err != nil {
@@ -769,7 +769,7 @@ func (l *queryListener) ExitFromClause(ctx *parser.FromClauseContext) {
 
 func (l *queryListener) ExitGroupClause(ctx *parser.GroupClauseContext) {
 	allGroups := ctx.Groups().AllGroupName()
-	for i := 0; i < len(allGroups); i++ {
+	for i := range len(allGroups) {
 		group := allGroups[i]
 		fieldName := group.GetText()
 		l.groupFieldNames = append(l.groupFieldNames, fieldName)
@@ -789,7 +789,7 @@ func (l *queryListener) ExitGroupClause(ctx *parser.GroupClauseContext) {
 	}
 
 	for g, groupFieldName := range l.groupFieldNames {
-		for i := 0; i < fields.Len(); i++ {
+		for i := range fields.Len() {
 			field := fields.At(i)
 			var name string
 			if name, err = field.Name(); err != nil {
@@ -842,7 +842,7 @@ func (l *queryListener) ExitAggregations(ctx *parser.AggregationsContext) {
 	if calls, err = node.Calls(); err != nil {
 		panic(err)
 	}
-	for i := 0; i < calls.Len(); i++ {
+	for i := range calls.Len() {
 		call := calls.At(i)
 		var field fluid.Field
 		if field, err = call.OutputField(); err != nil {
@@ -1046,7 +1046,7 @@ func (l *queryListener) EnterAppendClause(ctx *parser.AppendClauseContext) {
 		panic(err)
 	}
 
-	for i := 0; i < len(allProjections); i++ {
+	for i := range len(allProjections) {
 		projection := allProjections[i]
 		fieldName := projection.GetText()
 
@@ -1054,7 +1054,7 @@ func (l *queryListener) EnterAppendClause(ctx *parser.AppendClauseContext) {
 		if otherFields, err = l.aggregateFilterNode().Fields(); err != nil {
 			panic(err)
 		}
-		for j := 0; j < otherFields.Len(); j++ {
+		for j := range otherFields.Len() {
 			otherField := otherFields.At(j)
 			newField := fields.At(i)
 
@@ -1228,7 +1228,7 @@ func copyGroupFields(from *fluid.Node, to *fluid.Node) {
 }
 
 func copyFieldsHelper(oldFields *capnp.StructList[fluid.Field], newFields *capnp.StructList[fluid.Field]) {
-	for i := 0; i < (*oldFields).Len(); i++ {
+	for i := range (*oldFields).Len() {
 		oldField := (*oldFields).At(i)
 		newField := (*newFields).At(i)
 
@@ -1251,7 +1251,7 @@ func copyFieldsHelper(oldFields *capnp.StructList[fluid.Field], newFields *capnp
 		if newProperties, err = newField.NewProperties(int32(oldProperties.Len())); err != nil {
 			panic(err)
 		}
-		for j := 0; j < oldProperties.Len(); j++ {
+		for j := range oldProperties.Len() {
 			oldProperty := oldProperties.At(j)
 			newProperty := newProperties.At(j)
 
