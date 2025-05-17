@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -12,18 +13,20 @@ import (
 	"time"
 
 	"capnproto.org/go/capnp/v3"
-	"github.com/rs/zerolog"
 	"github.com/xralf/fluid/capnp/fluid"
 	"github.com/xralf/fluid/pkg/plan"
 )
 
 var (
-	log zerolog.Logger
+	logger *slog.Logger
 )
 
 func Init() {
-	log = zerolog.New(os.Stderr).With().Caller().Logger()
-	log.Info().Msg("Catalog says welcome!")
+	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelInfo,
+	}))
+	logger.Info("Catalog says welcome!")
 }
 
 func ShowPlan() {

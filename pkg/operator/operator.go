@@ -2,13 +2,13 @@ package operator
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"reflect"
 	"strconv"
 	"time"
 
 	"capnproto.org/go/capnp/v3"
-	"github.com/rs/zerolog"
 	"github.com/xralf/fluid/capnp/data"
 	"github.com/xralf/fluid/capnp/fluid"
 	"github.com/xralf/fluid/pkg/compiler"
@@ -17,13 +17,14 @@ import (
 )
 
 var (
-	log zerolog.Logger
+	logger *slog.Logger
 )
 
 func Init() {
-	//zerolog.SetGlobalLevel(zerolog.Disabled)
-	//zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	log = zerolog.New(os.Stderr).With().Caller().Timestamp().Logger()
+	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelInfo,
+	}))
 }
 
 type Operator struct {
@@ -468,7 +469,7 @@ func InvokeWithoutParameters(any interface{}, methodName string) []reflect.Value
 
 func InvokeWithParameters(any interface{}, methodName string, args ...interface{}) []reflect.Value {
 	if args == nil {
-		log.Info().Msgf("InvokeWithParameters: args == nil: %v", args)
+		logger.Info(fmt.Sprintf("InvokeWithParameters: args == nil: %v", args))
 	}
 	inputs := make([]reflect.Value, len(args))
 	//log.Info().Msgf("Invoke: methodName: %v, len(args): %v, len(inputs): %v, inputs: %v\n", methodName, len(args), len(inputs), inputs)

@@ -111,7 +111,6 @@ prepare:
 	go get zombiezen.com/go/capnproto2
 	go get capnproto.org/go/capnp/v3
 	go install capnproto.org/go/capnp/v3/capnpc-go@latest
-	go get github.com/rs/zerolog
 	go get github.com/DataDog/hyperloglog
 	cd $(CAPNP_PATH); git clone https://github.com/capnproto/go-capnproto2.git
 	cd capnp/fluid; go generate

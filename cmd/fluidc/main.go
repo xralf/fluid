@@ -28,9 +28,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
-
-	"github.com/rs/zerolog"
 
 	_ "github.com/xralf/fluid/pkg/plan"
 	"github.com/xralf/fluid/pkg/utility"
@@ -38,10 +37,19 @@ import (
 	"github.com/xralf/fluid/pkg/compiler"
 )
 
-func main() {
-	log := zerolog.New(os.Stderr).With().Caller().Logger()
-	log.Info().Msg("Compiler says welcome!")
+var (
+	logger *slog.Logger
+)
 
+func init() {
+	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelInfo,
+	}))
+	logger.Info("Compiler says welcome!")
+}
+
+func main() {
 	err := errors.New("unknown or missing argument\nusage: fluidc [compile|show]")
 
 	if len(os.Args) != 2 {
@@ -50,7 +58,7 @@ func main() {
 
 	cmdArgs := os.Args[1]
 
-	log.Info().Msgf("command used: %s", cmdArgs)
+	logger.Info(fmt.Sprintf("command used: %s", cmdArgs))
 
 	compiler.Init()
 	switch cmdArgs {
@@ -61,9 +69,9 @@ func main() {
 	default:
 		err := errors.New("unknown or missing argument/nusage: z [compile|show]")
 		fmt.Print(err)
-		log.Error().Err(err)
+		logger.Error(err.Error())
 		os.Exit(0)
 	}
 
-	log.Info().Msg("Compiler says good-bye!")
+	logger.Info("Compiler says good-bye!")
 }

@@ -3,12 +3,12 @@ package codegen
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"strconv"
 	"strings"
 
 	"capnproto.org/go/capnp/v3"
-	"github.com/rs/zerolog"
 	"github.com/xralf/fluid/capnp/fluid"
 	"github.com/xralf/fluid/pkg/utility"
 )
@@ -136,9 +136,9 @@ package functions
 
 func goDefaultImports() string {
 	return `
+import "log/slog"
 import "os"
 import "github.com/xralf/fluid/capnp/data"
-import "github.com/rs/zerolog"
 `
 }
 
@@ -159,11 +159,14 @@ type Filter struct{}
 func goInitFunction() string {
 	return `
 var (
-	log zerolog.Logger
+	logger *slog.Logger
 )
 
 func init() {
-	log = zerolog.New(os.Stderr).With().Caller().Timestamp().Logger()
+	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelInfo,
+	}))
 }
 `
 }
@@ -177,13 +180,15 @@ const (
 )
 
 var (
-	log zerolog.Logger
+	logger *slog.Logger
 )
 
 func Init() {
-	//zerolog.SetGlobalLevel(zerolog.Disabled)
-	//zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	log = zerolog.New(os.Stderr).With().Caller().Timestamp().Logger()
+	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelInfo,
+	}))
+	logger.Info("Catalog says welcome!")
 }
 
 func GoInternalPayload(nodeName string, node *fluid.Node, operatorType fluid.OperatorType, rootNode *fluid.Node) (code string) {
@@ -375,9 +380,9 @@ func CapnpStructIngressRow(rootNode *fluid.Node, fields capnp.StructList[fluid.F
 			panic(err)
 		}
 		catalogType := fields.At(i).Type().String()
-		log.Printf("1 %v (%v)", name, catalogType)
+		logger.Info(fmt.Sprintf("1 %v (%v)", name, catalogType))
 		capnpType := FindCatalogFieldType(rootNode, name, fluid.OperatorType_ingress)
-		log.Printf("2 %v (%v)", name, capnpType)
+		logger.Info(fmt.Sprintf("2 %v (%v)", name, capnpType))
 		code += CapnpFieldDeclaration(name, i, capnpType, 1)
 	}
 	code += "}\n"
@@ -455,7 +460,7 @@ func CapnpFieldDeclaration(fieldName string, index int, fieldType fluid.FieldTyp
 }
 
 func FindCatalogFieldType(rootNode *fluid.Node, name string, operatorType fluid.OperatorType) (typ fluid.FieldType) {
-	log.Info().Msgf("FindCatalogFieldType: name: %v\n", name)
+	logger.Info(fmt.Sprintf("FindCatalogFieldType: name: %v\n", name))
 
 	// Find the ingressNode node that has the information about all fields
 	var ingressNode *fluid.Node
@@ -476,7 +481,6 @@ func FindCatalogFieldType(rootNode *fluid.Node, name string, operatorType fluid.
 		if fieldName, err = field.Name(); err != nil {
 			panic(err)
 		}
-		//zlog.Printf("getFieldType 1: (%v,%v)", name, fieldName)
 		if fieldName == name {
 			return field.Type()
 		}

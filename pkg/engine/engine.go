@@ -4,6 +4,7 @@ package engine
 import (
 	"encoding/csv"
 	"fmt"
+	"log/slog"
 	"math"
 
 	"io"
@@ -20,8 +21,6 @@ import (
 	"github.com/xralf/fluid/pkg/utility"
 
 	"capnproto.org/go/capnp/v3"
-
-	"github.com/rs/zerolog"
 )
 
 const (
@@ -30,14 +29,15 @@ const (
 )
 
 var (
-	log zerolog.Logger
+	logger *slog.Logger
 )
 
 func init() {
-	//zerolog.SetGlobalLevel(zerolog.Disabled)
-	//zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	log = zerolog.New(os.Stderr).With().Caller().Timestamp().Logger()
-	log.Info().Msg("Engine says welcome!")
+	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelInfo,
+	}))
+	logger.Info("Engine says welcome!")
 
 	operator.Init() // configure logging
 }
@@ -206,7 +206,7 @@ func (e *Engine) IngressFilterWorker() {
 }
 
 func (e *Engine) WindowWorker() {
-	log.Info().Msgf("WindowWorker: windowType: %s", e.window.WindowType)
+	logger.Info(fmt.Sprintf("WindowWorker: windowType: %s", e.window.WindowType))
 
 	switch e.window.WindowType {
 	case compiler.WindowTypeSession:

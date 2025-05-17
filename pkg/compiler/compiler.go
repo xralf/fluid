@@ -54,12 +54,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"strconv"
 
 	"capnproto.org/go/capnp/v3"
 	"github.com/antlr4-go/antlr/v4"
-	"github.com/rs/zerolog"
 	"github.com/xralf/fluid/capnp/fluid"
 	"github.com/xralf/fluid/pkg/_out/query/parser"
 	"github.com/xralf/fluid/pkg/catalog"
@@ -90,7 +90,7 @@ const (
 )
 
 var (
-	log zerolog.Logger
+	logger *slog.Logger
 )
 
 type queryListener struct {
@@ -345,9 +345,10 @@ type QueryPlan struct {
 }
 
 func Init() {
-	//zerolog.SetGlobalLevel(zerolog.Disabled)
-	//zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	log = zerolog.New(os.Stderr).With().Caller().Timestamp().Logger()
+	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelInfo,
+	}))
 	codegen.Init()
 	utility.Init()
 }
@@ -361,12 +362,12 @@ func Compile() {
 	}
 	query = string(bytes)
 
-	log.Info().Msgf("query: %s", query)
+	logger.Info(fmt.Sprintf("query: %s", query))
 
 	var msg *capnp.Message
 	var seg *capnp.Segment
 	if msg, seg, err = capnp.NewMessage(capnp.SingleSegment(nil)); err != nil {
-		log.Error().Err(err)
+		logger.Error(err.Error())
 		panic(err)
 	}
 
@@ -384,7 +385,7 @@ func parseQuery(msg *capnp.Message, seg *capnp.Segment, query string) fluid.Node
 	}
 	var err error
 	if listener.queryPlan.root, err = fluid.NewRootNode(seg); err != nil {
-		log.Error().Err(err)
+		logger.Error(err.Error())
 		panic(err)
 	}
 
@@ -747,7 +748,7 @@ func (l *queryListener) ExitFromClause(ctx *parser.FromClauseContext) {
 		panic(err)
 	}
 	// FIXME: Why do I need to read msg?
-	log.Info().Msgf("ExitFromClause: msg: %v", msg)
+	logger.Info(fmt.Sprintf("ExitFromClause: msg: %v", msg))
 
 	var fields capnp.StructList[fluid.Field]
 	if fields, err = table.Fields(); err != nil {
@@ -950,8 +951,8 @@ func (l *queryListener) ExitSliceWindow(ctx *parser.SliceWindowContext) {
 	} else {
 		durationText := l.pop() // flush the stack
 		theList := l.goCode.Definitions
-		log.Printf("ExitSliceWindowClause: durationText: %v", durationText)
-		log.Printf("ExitSliceWindowClause: theList: %v", theList)
+		logger.Info(fmt.Sprintf("ExitSliceWindowClause: durationText: %v", durationText))
+		logger.Info(fmt.Sprintf("ExitSliceWindowClause: theList: %v", theList))
 		l.goCode.Definitions = []string{} // flush the list
 
 		duration := ctx.Duration()
@@ -1108,7 +1109,7 @@ func (l *queryListener) addAggregateFunction(functionName string, inputFieldName
 	var function fluid.Function
 	var err error
 	if function, err = fluid.NewFunction(l.queryPlan.seg); err != nil {
-		log.Error().Err(err)
+		logger.Error(err.Error())
 		panic(err)
 	}
 	function.SetIsAggregate(true)
@@ -1122,7 +1123,7 @@ func (l *queryListener) addAggregateFunction(functionName string, inputFieldName
 	}
 	inputFieldType := field.Type()
 	// FIXME: Why do I need to read msg?
-	log.Info().Msgf("ExitWhereClause: msg: %v", msg)
+	logger.Info(fmt.Sprintf("ExitWhereClause: msg: %v", msg))
 
 	var outputFieldType fluid.FieldType
 	if outputType != nil {

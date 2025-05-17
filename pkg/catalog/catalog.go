@@ -7,10 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"strings"
 
-	"github.com/rs/zerolog"
 	"github.com/xralf/fluid/capnp/fluid"
 	"github.com/xralf/fluid/pkg/common"
 
@@ -18,12 +18,15 @@ import (
 )
 
 var (
-	log zerolog.Logger
+	logger *slog.Logger
 )
 
 func init() {
-	log = zerolog.New(os.Stderr).With().Caller().Logger()
-	log.Info().Msg("Catalog says welcome!")
+	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelInfo,
+	}))
+	logger.Info("Catalog says welcome!")
 }
 
 type Catalog struct {

@@ -6,13 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"math/rand"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/xralf/fluid/pkg/common"
 )
 
@@ -37,11 +37,6 @@ const (
 	RangeGroup     = 2
 
 	charset = "abcdefghijklmnopqrstuvwxyz"
-)
-
-var (
-	seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
-	log        zerolog.Logger
 )
 
 type Catalog struct {
@@ -82,14 +77,17 @@ const (
 )
 
 var (
+	logger        *slog.Logger
+	seededRand    *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 	randGenerator *rand.Rand
 )
 
 func init() {
-	//zerolog.SetGlobalLevel(zerolog.Disabled)
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	log = zerolog.New(os.Stderr).With().Caller().Timestamp().Logger()
-	log.Info().Msg("Data Generator says welcome!")
+	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelInfo,
+	}))
+	logger.Info("Data Generator says welcome!")
 
 	randGenerator = rand.New(rand.NewSource(time.Now().UnixNano()))
 }
