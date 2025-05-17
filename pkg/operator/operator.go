@@ -64,7 +64,7 @@ func (s *Operator) Init(node *fluid.Node) {
 	}
 
 	s.GroupFieldNamesToTypes = make(map[string]fluid.FieldType)
-	for i := 0; i < groupFields.Len(); i++ {
+	for i := range groupFields.Len() {
 		f := groupFields.At(i)
 		var name string
 		if name, err = f.Name(); err != nil {
@@ -93,7 +93,7 @@ func (o *Filter) Init(node *fluid.Node) {
 	if err != nil {
 		panic(err)
 	}
-	for i := 0; i < conditions.Len(); i++ {
+	for i := range conditions.Len() {
 		c := conditions.At(i)
 		fieldName, err := c.FieldName()
 		if err != nil {
@@ -202,11 +202,11 @@ func (o *Ingress) Ingress(record []string, row *data.IngressRow) {
 		panic(err)
 	}
 
-	for i := 0; i < len(record); i++ {
+	for i := range len(record) {
 		theType := stringToType(record[i], o.OutputFieldTypes[i])
 		InvokeWithParameters(payload, "Set"+utility.UpcaseFirstLetter(o.OutputFieldNames[i]), theType)
 
-		for g := 0; g < len(o.GroupFieldNames); g++ {
+		for g := range len(o.GroupFieldNames) {
 			if o.GroupFieldNames[g] == o.OutputFieldNames[i] {
 				InvokeWithParameters(group, "Set"+utility.UpcaseFirstLetter(o.GroupFieldNames[g]), theType)
 				break
@@ -238,7 +238,7 @@ func (o *Aggregate) Init(node *fluid.Node) {
 		panic(err)
 	}
 
-	for i := 0; i < calls.Len(); i++ {
+	for i := range calls.Len() {
 		var function fluid.Function
 		if function, err = calls.At(i).Function(); err != nil {
 			panic(err)
@@ -317,7 +317,7 @@ func (o *Aggregate) Value(outRow *data.AggregateRow) {
 		panic(err)
 	}
 
-	for i := 0; i < len(o.OutputFieldNames); i++ {
+	for i := range len(o.OutputFieldNames) {
 		outputName := o.OutputFieldNames[i]
 		outputType := o.OutputFieldTypes[i]
 
@@ -365,7 +365,7 @@ func (o *Aggregate) Update(inRow data.IngressRow) {
 		panic(err)
 	}
 
-	for i := 0; i < len(o.inputNames); i++ {
+	for i := range len(o.inputNames) {
 		// Example: For "avg(foo) as avgFoo", "foo" is the inputName and "avgFoo" is the outputName.
 		inputName := o.inputNames[i]
 		getMethodName := utility.UpcaseFirstLetter(inputName)
@@ -401,7 +401,7 @@ func (o *Project) Project(inRow *data.AggregateRow, outRow *data.EgressRow) {
 		panic(err)
 	}
 
-	for i := 0; i < len(o.OutputFieldNames); i++ {
+	for i := range len(o.OutputFieldNames) {
 		getMethodName := o.OutputFieldNames[i]
 		values := InvokeWithoutParameters(inPayload, getMethodName)
 		value := values[0]

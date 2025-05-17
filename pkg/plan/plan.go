@@ -63,7 +63,7 @@ func FluidNodeToPlan(node fluid.Node) (p PlanNode) {
 		if fields, err = node.Fields(); err != nil {
 			panic(err)
 		}
-		for i := 0; i < fields.Len(); i++ {
+		for i := range fields.Len() {
 			field := fields.At(i)
 			var name, typ, description, usage string
 
@@ -90,7 +90,7 @@ func FluidNodeToPlan(node fluid.Node) (p PlanNode) {
 		if fields, err = node.GroupFields(); err != nil {
 			panic(err)
 		}
-		for i := 0; i < fields.Len(); i++ {
+		for i := range fields.Len() {
 			field := fields.At(i)
 			var name, typ, description, usage string
 
@@ -116,7 +116,7 @@ func FluidNodeToPlan(node fluid.Node) (p PlanNode) {
 		if calls, err = node.Calls(); err != nil {
 			panic(err)
 		}
-		for i := 0; i < calls.Len(); i++ {
+		for i := range calls.Len() {
 			var function fluid.Function
 			if function, err = calls.At(i).Function(); err != nil {
 				panic(err)
@@ -181,7 +181,7 @@ func FluidNodeToPlan(node fluid.Node) (p PlanNode) {
 				panic(err)
 			}
 			var inFields []PlanField
-			for j := 0; j < inputFields.Len(); j++ {
+			for j := range inputFields.Len() {
 				field := inputFields.At(j)
 
 				if name, err = field.Name(); err != nil {
@@ -226,7 +226,7 @@ func FluidNodeToPlan(node fluid.Node) (p PlanNode) {
 	if properties, err = node.Properties(); err != nil {
 		panic(err)
 	}
-	for i := 0; i < properties.Len(); i++ {
+	for i := range properties.Len() {
 		var key string
 		if key, err = properties.At(i).Key(); err != nil {
 			panic(err)
@@ -292,7 +292,7 @@ func FluidNodeToPlan(node fluid.Node) (p PlanNode) {
 	if children, err = node.Children(); err != nil {
 		panic(err)
 	}
-	for i := 0; i < children.Len(); i++ {
+	for i := range children.Len() {
 		child := children.At(i)
 		p.Children = append(p.Children, FluidNodeToPlan(child))
 	}

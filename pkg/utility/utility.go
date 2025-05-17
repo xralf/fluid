@@ -99,7 +99,7 @@ func FindFirstNodeByType(node *fluid.Node, opType fluid.OperatorType) (target *f
 	if children, err = node.Children(); err != nil {
 		panic(err)
 	}
-	for i := 0; i < children.Len(); i++ {
+	for i := range children.Len() {
 		candidate := children.At(i)
 		var ok bool
 		if target, ok = FindFirstNodeByType(&candidate, opType); ok {
@@ -140,7 +140,7 @@ func CreateCapnpId() (capnpId string) {
 
 func RandomString(l int) string {
 	bytes := make([]byte, l)
-	for i := 0; i < l; i++ {
+	for i := range l {
 		bytes[i] = byte(RandomInt(65, 90))
 	}
 	return string(bytes)

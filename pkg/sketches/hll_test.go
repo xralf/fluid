@@ -95,7 +95,7 @@ func testReset(t *testing.T, m uint, numObjects, runs int) {
 		t.Fatalf("can't make New(%d): %v", m, err)
 	}
 
-	for i := 0; i < runs; i++ {
+	for i := range runs {
 		for j := 0; j < numObjects; j++ {
 			h.Add(rand.Uint32())
 		}
