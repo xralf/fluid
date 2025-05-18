@@ -24,7 +24,7 @@ var (
 func Init() {
 	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		AddSource: true,
-		Level:     slog.LevelInfo,
+		Level:     slog.LevelDebug,
 	}))
 	logger.Info("Catalog says welcome!")
 }

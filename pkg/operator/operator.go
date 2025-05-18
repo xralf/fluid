@@ -23,7 +23,7 @@ var (
 func Init() {
 	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		AddSource: true,
-		Level:     slog.LevelInfo,
+		Level:     slog.LevelDebug,
 	}))
 }
 
@@ -433,7 +433,7 @@ func (o *Egress) Init(node *fluid.Node) {
 	//o.Operator.
 }
 
-func stringToType(value string, t fluid.FieldType) interface{} {
+func stringToType(value string, t fluid.FieldType) any {
 	switch t {
 	case fluid.FieldType_text:
 		return value
@@ -459,7 +459,7 @@ func stringToType(value string, t fluid.FieldType) interface{} {
 	panic(fmt.Errorf("cannot cast string value \"%s\" to type %s", value, t.String()))
 }
 
-func InvokeWithoutParameters(any interface{}, methodName string) []reflect.Value {
+func InvokeWithoutParameters(any any, methodName string) []reflect.Value {
 	value := reflect.ValueOf(any)
 	upperCaseMethodName := utility.UpcaseFirstLetter(methodName)
 	method := value.MethodByName(upperCaseMethodName)
@@ -467,9 +467,12 @@ func InvokeWithoutParameters(any interface{}, methodName string) []reflect.Value
 	return results
 }
 
-func InvokeWithParameters(any interface{}, methodName string, args ...interface{}) []reflect.Value {
+func InvokeWithParameters(any any, methodName string, args ...any) []reflect.Value {
 	if args == nil {
-		logger.Info(fmt.Sprintf("InvokeWithParameters: args == nil: %v", args))
+		logger.Info(
+			"InvokeWithParameters",
+			"args == nil", args,
+		)
 	}
 	inputs := make([]reflect.Value, len(args))
 	//log.Info().Msgf("Invoke: methodName: %v, len(args): %v, len(inputs): %v, inputs: %v\n", methodName, len(args), len(inputs), inputs)
@@ -485,7 +488,7 @@ func InvokeWithParameters(any interface{}, methodName string, args ...interface{
 	return results
 }
 
-func typeCast(value reflect.Value, t fluid.FieldType) interface{} {
+func typeCast(value reflect.Value, t fluid.FieldType) any {
 	switch t {
 	case fluid.FieldType_boolean:
 		return value.Bool()

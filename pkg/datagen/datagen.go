@@ -85,7 +85,7 @@ var (
 func init() {
 	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		AddSource: true,
-		Level:     slog.LevelInfo,
+		Level:     slog.LevelDebug,
 	}))
 	logger.Info("Data Generator says welcome!")
 

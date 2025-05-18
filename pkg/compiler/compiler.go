@@ -347,7 +347,7 @@ type QueryPlan struct {
 func Init() {
 	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		AddSource: true,
-		Level:     slog.LevelInfo,
+		Level:     slog.LevelDebug,
 	}))
 	codegen.Init()
 	utility.Init()
@@ -362,7 +362,10 @@ func Compile() {
 	}
 	query = string(bytes)
 
-	logger.Info(fmt.Sprintf("query: %s", query))
+	logger.Info(
+		"query",
+		"text", query,
+	)
 
 	var msg *capnp.Message
 	var seg *capnp.Segment
@@ -748,7 +751,10 @@ func (l *queryListener) ExitFromClause(ctx *parser.FromClauseContext) {
 		panic(err)
 	}
 	// FIXME: Why do I need to read msg?
-	logger.Info(fmt.Sprintf("ExitFromClause: msg: %v", msg))
+	logger.Info(
+		"ExitFromClause",
+		"msg", msg,
+	)
 
 	var fields capnp.StructList[fluid.Field]
 	if fields, err = table.Fields(); err != nil {
@@ -951,8 +957,11 @@ func (l *queryListener) ExitSliceWindow(ctx *parser.SliceWindowContext) {
 	} else {
 		durationText := l.pop() // flush the stack
 		theList := l.goCode.Definitions
-		logger.Info(fmt.Sprintf("ExitSliceWindowClause: durationText: %v", durationText))
-		logger.Info(fmt.Sprintf("ExitSliceWindowClause: theList: %v", theList))
+		logger.Info(
+			"ExitSliceWindowClause",
+			"durationText", durationText,
+			"theList", theList,
+		)
 		l.goCode.Definitions = []string{} // flush the list
 
 		duration := ctx.Duration()
@@ -1123,7 +1132,10 @@ func (l *queryListener) addAggregateFunction(functionName string, inputFieldName
 	}
 	inputFieldType := field.Type()
 	// FIXME: Why do I need to read msg?
-	logger.Info(fmt.Sprintf("ExitWhereClause: msg: %v", msg))
+	logger.Info(
+		"ExitWhereClause",
+		"msg", msg,
+	)
 
 	var outputFieldType fluid.FieldType
 	if outputType != nil {

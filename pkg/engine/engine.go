@@ -35,7 +35,7 @@ var (
 func init() {
 	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		AddSource: true,
-		Level:     slog.LevelInfo,
+		Level:     slog.LevelDebug,
 	}))
 	logger.Info("Engine says welcome!")
 
@@ -206,7 +206,10 @@ func (e *Engine) IngressFilterWorker() {
 }
 
 func (e *Engine) WindowWorker() {
-	logger.Info(fmt.Sprintf("WindowWorker: windowType: %s", e.window.WindowType))
+	logger.Info(
+		"WindowWorker",
+		"windowType", e.window.WindowType,
+	)
 
 	switch e.window.WindowType {
 	case compiler.WindowTypeSession:

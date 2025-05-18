@@ -165,7 +165,7 @@ var (
 func init() {
 	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		AddSource: true,
-		Level:     slog.LevelInfo,
+		Level:     slog.LevelDebug,
 	}))
 }
 `
@@ -186,7 +186,7 @@ var (
 func Init() {
 	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		AddSource: true,
-		Level:     slog.LevelInfo,
+		Level:     slog.LevelDebug,
 	}))
 	logger.Info("Catalog says welcome!")
 }
@@ -380,9 +380,13 @@ func CapnpStructIngressRow(rootNode *fluid.Node, fields capnp.StructList[fluid.F
 			panic(err)
 		}
 		catalogType := fields.At(i).Type().String()
-		logger.Info(fmt.Sprintf("1 %v (%v)", name, catalogType))
 		capnpType := FindCatalogFieldType(rootNode, name, fluid.OperatorType_ingress)
-		logger.Info(fmt.Sprintf("2 %v (%v)", name, capnpType))
+		logger.Info(
+			"field",
+			"name", name,
+			"catalog type", catalogType,
+			"capnp type", strconv.Itoa(int(capnpType)),
+		)
 		code += CapnpFieldDeclaration(name, i, capnpType, 1)
 	}
 	code += "}\n"
@@ -460,7 +464,10 @@ func CapnpFieldDeclaration(fieldName string, index int, fieldType fluid.FieldTyp
 }
 
 func FindCatalogFieldType(rootNode *fluid.Node, name string, operatorType fluid.OperatorType) (typ fluid.FieldType) {
-	logger.Info(fmt.Sprintf("FindCatalogFieldType: name: %v\n", name))
+	logger.Info(
+		"FindCatalogFieldType",
+		"name", name,
+	)
 
 	// Find the ingressNode node that has the information about all fields
 	var ingressNode *fluid.Node

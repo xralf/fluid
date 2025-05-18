@@ -44,7 +44,7 @@ var (
 func init() {
 	logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		AddSource: true,
-		Level:     slog.LevelInfo,
+		Level:     slog.LevelDebug,
 	}))
 	logger.Info("Compiler says welcome!")
 }
@@ -58,7 +58,10 @@ func main() {
 
 	cmdArgs := os.Args[1]
 
-	logger.Info(fmt.Sprintf("command used: %s", cmdArgs))
+	logger.Info(
+		"command",
+		"arguments", cmdArgs,
+	)
 
 	compiler.Init()
 	switch cmdArgs {

@@ -74,7 +74,7 @@ generate:
 run:
 	@cat $(JOB_DATA) | $(THROTTLE) --milliseconds 100 --append-timestamp false | $(ENGINE) -p $(PLANB) -x $(EXIT_AFTER_SECONDS) 2>> $(LOG)
 
-build: clean prepare build_compiler build_engine build_datagen build_throttle
+build: clean prepare build_compiler build_engine build_datagen build_throttle build_reverse
 
 #again: clean_log mini_build run
 
@@ -143,6 +143,8 @@ build_engine:
 	go build $(FUNCTIONS_PATH)/functions.go
 	go build -o $(ENGINE) $(ENGINE_PATH)/main.go
 	cp $(ENGINE) $(JOB_PATH)
+	echo "$(ENGINE)" > /tmp/out1
+	echo "xxx1" > /tmp/out2
 	go mod tidy
 
 build_datagen:
@@ -150,6 +152,9 @@ build_datagen:
 
 build_throttle:
 	go build -o cmd/throttle/throttle cmd/throttle/main.go
+
+build_reverse:
+	go build -o cmd/tools/reverse cmd/tools/reverse/reverse.go
 
 run2:
 #	@cat $(TABLE_NAME_CSV) | $(ENGINE) -p $(PLANB) 2>> $(LOG)
@@ -183,6 +188,7 @@ clean:
 	rm -f $(ENGINE)
 	rm -f cmd/datagen/generator
 	rm -f cmd/throttle/throttle
+	rm -f cmd/tools/reverse/reverse
 	rm -f go.mod
 	rm -f go.sum
 	rm -f go.work.sum
