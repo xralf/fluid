@@ -45,7 +45,7 @@ func (s *Operator) Init(node *fluid.Node) {
 	}
 
 	s.OutputFieldNamesToTypes = make(map[string]fluid.FieldType)
-	for i := 0; i < fields.Len(); i++ {
+	for i := range fields.Len() {
 		f := fields.At(i)
 		var name string
 		if name, err = f.Name(); err != nil {

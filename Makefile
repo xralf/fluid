@@ -1,4 +1,36 @@
 ##
+## This Makefile expects 2 input arguments, which are provided as shell variables:
+##
+##   - SRC_EXAMPLE_PATH:  Absolute path to the input example directory
+##   - DST_JOB_PATH:      Absolute path to the output job directory
+##
+## Example command for this Makefile:
+##
+##    SRC_EXAMPLE_PATH=~/git/xralf/fluid/examples/synthetic-slice-time-live \
+##    DST_JOB_PATH=/tmp/myjobs \
+##    make build
+##
+
+# SRC_EXAMPLE_PATH=~/git/xralf/fluid/examples/synthetic-slice-time-live DST_JOB_PATH=/tmp/myjobs make all
+# SRC_EXAMPLE_PATH= DST_JOB_PATH= make all
+
+## Some default destination example for missing argument
+ifeq ($(DST_JOB_PATH),)
+DST_JOB_PATH           := /tmp/myjobs2
+endif
+
+## Some default example source for missing argument
+ifeq ($(SRC_EXAMPLE_PATH),)
+SRC_EXAMPLE_PATH       := examples/synthetic-slice-time-live
+endif
+
+SRC_EXAMPLE_BASE	   := $(shell basename $(SRC_EXAMPLE_PATH))
+SRC_EXAMPLE_DIR	       := $(shell dirname $(SRC_EXAMPLE_PATH))
+
+DST_EXAMPLE_BASE	   := $(SRC_EXAMPLE_BASE)
+DST_EXAMPLE_PATH	   := $(DST_JOB_PATH)/$(SRC_EXAMPLE_BASE)
+
+##
 ## Call this Makefile as shown in run-example.sh
 ##
 ## JOB_PATH is a shell variable passed to the Makefile.
@@ -9,14 +41,20 @@ EXIT_AFTER_SECONDS     := 3600
 
 REPO                   := github.com/xralf/fluid
 
-EXAMPLE                := synthetic-slice-time-live
-EXAMPLES_PATH          := examples
-EXAMPLE_TEMPLATE       := ${EXAMPLES_PATH}/$(EXAMPLE)
+# EXAMPLE                := synthetic-slice-time-live
+# EXAMPLES_PATH          := examples
+# EXAMPLE_TEMPLATE       := ${EXAMPLES_PATH}/$(EXAMPLE)
+EXAMPLE                := $(DST_EXAMPLE_BASE)
+EXAMPLES_PATH          := $(DST_EXAMPLE_PATH)
+EXAMPLE_TEMPLATE       := $(DST_EXAMPLE_PATH)
 
-JOBS_PATH              := /tmp/jobs
-JOB_PATH               := $(JOBS_PATH)/$(EXAMPLE)
+#JOBS_PATH              := /tmp/jobs
+JOBS_PATH              := $(DST_JOB_PATH)
+#JOB_PATH               := $(JOBS_PATH)/$(EXAMPLE)
+JOB_PATH               := $(DST_JOB_PATH)
+
 #JOB_DATA               := $(JOB_PATH)/$(TABLE_NAME).csv
-JOB_DATA               := $(JOB_PATH)/sample.csv
+JOB_DATA               := $(DST_EXAMPLE_PATH)/sample.csv
 JOB_ENGINE             := $(JOB_PATH)/fluid
 JOB_PLANB              := $(JOB_PATH)/plan.bin
 JOB_PLANJ              := $(JOB_PATH)/plan.json
@@ -35,11 +73,12 @@ PLAN_PATH              := $(OUT_PATH)
 CATALOG_OUT_PATH       := $(OUT_PATH)/catalog
 CSV_DATA_PATH          := $(OUT_PATH)/csv_data
 CSV_TEMPLATE_PATH      := $(OUT_PATH)/csv_templates
-EXAMPLE_QUERY_PATH     := $(JOB_PATH)/query.fql
+EXAMPLE_QUERY_PATH     := $(DST_EXAMPLE_PATH)/query.fql
 TEMPLATE_PATH          := templates
 
 LOG                    := fluid.log
-CATALOGJ_MASTER        := $(JOB_PATH)/catalog.json
+#CATALOGJ_MASTER        := $(JOB_PATH)/catalog.json
+CATALOGJ_MASTER        := $(DST_EXAMPLE_PATH)/catalog.json
 CATALOGB               := $(OUT_PATH)/catalog.bin
 CATALOGJ               := $(OUT_PATH)/catalog.json
 PLANB                  := $(PLAN_PATH)/plan.bin
@@ -64,12 +103,18 @@ ANTLR4                 := "Unknown operating system name: $(OS_NAME)"
 endif
 
 all: build
+	@echo "DST_JOB_PATH" $(DST_JOB_PATH)
+	@echo "SRC_EXAMPLE_PATH" $(SRC_EXAMPLE_PATH)
+	@echo "SRC_EXAMPLE_BASE" $(SRC_EXAMPLE_BASE)
+	@echo "SRC_EXAMPLE_DIR" $(SRC_EXAMPLE_DIR)
+	@echo "DST_EXAMPLE_BASE" $(DST_EXAMPLE_BASE)
+	@echo "DST_EXAMPLE_PATH" $(DST_EXAMPLE_PATH)
 
 example: build generate run
 
 generate:
-	cp -f cmd/datagen/generator $(JOB_PATH)
-	cd $(JOB_PATH); ./prep.sh
+	cp -f cmd/datagen/generator $(DST_EXAMPLE_PATH)
+	cd $(DST_EXAMPLE_PATH); ./prep.sh
 
 run:
 	@cat $(JOB_DATA) | $(THROTTLE) --milliseconds 100 --append-timestamp false | $(ENGINE) -p $(PLANB) -x $(EXIT_AFTER_SECONDS) 2>> $(LOG)
@@ -96,7 +141,7 @@ mini_build:
 
 prepare:
 	mkdir -p $(JOBS_PATH)
-	cp -r $(EXAMPLE_TEMPLATE) $(JOBS_PATH)
+	cp -r $(SRC_EXAMPLE_PATH) $(JOBS_PATH)
 	mkdir -p $(JOB_PATH)
 	mkdir -p $(CAPNP_PATH)
 	mkdir -p $(OUT_PATH)
@@ -143,8 +188,6 @@ build_engine:
 	go build $(FUNCTIONS_PATH)/functions.go
 	go build -o $(ENGINE) $(ENGINE_PATH)/main.go
 	cp $(ENGINE) $(JOB_PATH)
-	echo "$(ENGINE)" > /tmp/out1
-	echo "xxx1" > /tmp/out2
 	go mod tidy
 
 build_datagen:
@@ -192,6 +235,7 @@ clean:
 	rm -f go.mod
 	rm -f go.sum
 	rm -f go.work.sum
+	rm -rf $(DST_JOB_PATH)
 	rm -rf $(JOBS_PATH)
 	rm -rf $(PKG_OUT_PATH)
 	rm -rf $(CAPNP_PATH)/go-capnproto2
