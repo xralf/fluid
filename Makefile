@@ -1,120 +1,107 @@
 ##
 ## This Makefile expects 2 input arguments, which are provided as shell variables:
 ##
-##   - SRC_EXAMPLE_PATH:  Absolute path to the input example directory
-##   - DST_JOB_PATH:      Absolute path to the output job directory
+##   - EXAMPLE_PATH:  Absolute path to the input example directory
+##   - JOB_DIR:       Absolute path to the output job directory
 ##
 ## Example command for this Makefile:
 ##
-##    SRC_EXAMPLE_PATH=~/git/xralf/fluid/examples/synthetic-slice-time-live \
-##    DST_JOB_PATH=/tmp/myjobs \
+##    EXAMPLE_PATH=~/git/xralf/fluid/examples/synthetic-slice-time-live \
+##    JOB_DIR=/tmp/myjobs \
 ##    make build
 ##
+##    EXAMPLE_PATH=~/git/xralf/fluid/examples/synthetic-slice-time-live JOB_DIR=/tmp/myjobs make all
+##
+##    EXAMPLE_PATH= JOB_DIR= make all
+##
 
-# SRC_EXAMPLE_PATH=~/git/xralf/fluid/examples/synthetic-slice-time-live DST_JOB_PATH=/tmp/myjobs make all
-# SRC_EXAMPLE_PATH= DST_JOB_PATH= make all
-
-## Some default destination example for missing argument
-ifeq ($(DST_JOB_PATH),)
-DST_JOB_PATH           := /tmp/myjobs2
-endif
-
+##
 ## Some default example source for missing argument
-ifeq ($(SRC_EXAMPLE_PATH),)
-SRC_EXAMPLE_PATH       := examples/synthetic-slice-time-live
+##
+ifeq ($(EXAMPLE_PATH),)
+EXAMPLE_PATH          := examples/synthetic-slice-time-live
 endif
+EXAMPLE_BASE	      := $(shell basename $(EXAMPLE_PATH))
+EXAMPLE_DIR	          := $(shell dirname $(EXAMPLE_PATH))
 
-SRC_EXAMPLE_BASE	   := $(shell basename $(SRC_EXAMPLE_PATH))
-SRC_EXAMPLE_DIR	       := $(shell dirname $(SRC_EXAMPLE_PATH))
-
-DST_EXAMPLE_BASE	   := $(SRC_EXAMPLE_BASE)
-DST_EXAMPLE_PATH	   := $(DST_JOB_PATH)/$(SRC_EXAMPLE_BASE)
+##
+## Some default destination example for missing argument
+##
+ifeq ($(JOB_DIR),)
+JOB_DIR               := /tmp/myjobs2
+endif
+JOB_PATH	          := $(JOB_DIR)/$(EXAMPLE_BASE)
 
 ##
 ## Call this Makefile as shown in run-example.sh
 ##
-## JOB_PATH is a shell variable passed to the Makefile.
+## JOB_DIR is a shell variable passed to the Makefile.
 ##
 
-THROTTLE_MILLISECONDS  := 20
-EXIT_AFTER_SECONDS     := 3600
+THROTTLE_MILLISECONDS := 20
+EXIT_AFTER_SECONDS    := 3600
 
-REPO                   := github.com/xralf/fluid
+REPO                  := github.com/xralf/fluid
 
-# EXAMPLE                := synthetic-slice-time-live
-# EXAMPLES_PATH          := examples
-# EXAMPLE_TEMPLATE       := ${EXAMPLES_PATH}/$(EXAMPLE)
-EXAMPLE                := $(DST_EXAMPLE_BASE)
-EXAMPLES_PATH          := $(DST_EXAMPLE_PATH)
-EXAMPLE_TEMPLATE       := $(DST_EXAMPLE_PATH)
+JOB_DATA              := $(JOB_PATH)/sample.csv
+JOB_ENGINE            := $(JOB_DIR)/fluid
+JOB_PLANB             := $(JOB_DIR)/plan.bin
+JOB_PLANJ             := $(JOB_DIR)/plan.json
+JOB_LOG               := $(JOB_DIR)/fluid.log
 
-#JOBS_PATH              := /tmp/jobs
-JOBS_PATH              := $(DST_JOB_PATH)
-#JOB_PATH               := $(JOBS_PATH)/$(EXAMPLE)
-JOB_PATH               := $(DST_JOB_PATH)
+CAPNP_PATH            := $(HOME)/git/capnproto
+CATALOG_PATH          := cmd/catalog
+COMPILER_PATH         := cmd/fluidc
+ENGINE_PATH           := cmd/fluid
+THROTTLE_PATH         := cmd/throttle
+PKG_OUT_PATH          := pkg/_out
+QUERY_PATH            := $(PKG_OUT_PATH)/query
+FUNCTIONS_PATH        := $(PKG_OUT_PATH)/functions
+OUT_PATH              := _out
+PLAN_PATH             := $(OUT_PATH)
+CATALOG_OUT_PATH      := $(OUT_PATH)/catalog
+CSV_DATA_PATH         := $(OUT_PATH)/csv_data
+CSV_TEMPLATE_PATH     := $(OUT_PATH)/csv_templates
+EXAMPLE_QUERY_PATH    := $(JOB_PATH)/query.fql
+TEMPLATE_PATH         := templates
 
-#JOB_DATA               := $(JOB_PATH)/$(TABLE_NAME).csv
-JOB_DATA               := $(DST_EXAMPLE_PATH)/sample.csv
-JOB_ENGINE             := $(JOB_PATH)/fluid
-JOB_PLANB              := $(JOB_PATH)/plan.bin
-JOB_PLANJ              := $(JOB_PATH)/plan.json
-JOB_LOG                := $(JOB_PATH)/fluid.log
+LOG                   := fluid.log
+CATALOGJ_MASTER       := $(JOB_PATH)/catalog.json
+CATALOGB              := $(OUT_PATH)/catalog.bin
+CATALOGJ              := $(OUT_PATH)/catalog.json
+PLANB                 := $(PLAN_PATH)/plan.bin
+PLANJ                 := $(PLAN_PATH)/plan.json
+#TABLE_NAME            := $(shell head -1 $(EXAMPLE_QUERY_PATH) | awk '{print $$2}')
 
-CAPNP_PATH             := $(HOME)/git/capnproto
-CATALOG_PATH           := cmd/catalog
-COMPILER_PATH          := cmd/fluidc
-ENGINE_PATH            := cmd/fluid
-THROTTLE_PATH          := cmd/throttle
-PKG_OUT_PATH           := pkg/_out
-QUERY_PATH             := $(PKG_OUT_PATH)/query
-FUNCTIONS_PATH         := $(PKG_OUT_PATH)/functions
-OUT_PATH               := _out
-PLAN_PATH              := $(OUT_PATH)
-CATALOG_OUT_PATH       := $(OUT_PATH)/catalog
-CSV_DATA_PATH          := $(OUT_PATH)/csv_data
-CSV_TEMPLATE_PATH      := $(OUT_PATH)/csv_templates
-EXAMPLE_QUERY_PATH     := $(DST_EXAMPLE_PATH)/query.fql
-TEMPLATE_PATH          := templates
+ANTLRGEN              := BaseListener Lexer Listener Parser
+GRAMMAR_QUERY         := FQL
+OS_NAME               := $(shell uname -s)
 
-LOG                    := fluid.log
-#CATALOGJ_MASTER        := $(JOB_PATH)/catalog.json
-CATALOGJ_MASTER        := $(DST_EXAMPLE_PATH)/catalog.json
-CATALOGB               := $(OUT_PATH)/catalog.bin
-CATALOGJ               := $(OUT_PATH)/catalog.json
-PLANB                  := $(PLAN_PATH)/plan.bin
-PLANJ                  := $(PLAN_PATH)/plan.json
-#TABLE_NAME             := $(shell head -1 $(EXAMPLE_QUERY_PATH) | awk '{print $$2}')
-
-ANTLRGEN               := BaseListener Lexer Listener Parser
-GRAMMAR_QUERY          := FQL
-OS_NAME                := $(shell uname -s)
-
-CATALOG                := $(CATALOG_PATH)/catalog
-COMPILER               := $(COMPILER_PATH)/fluidc
-ENGINE                 := $(ENGINE_PATH)/fluid
-THROTTLE			   := $(THROTTLE_PATH)/throttle
+CATALOG               := $(CATALOG_PATH)/catalog
+COMPILER              := $(COMPILER_PATH)/fluidc
+ENGINE                := $(ENGINE_PATH)/fluid
+THROTTLE			  := $(THROTTLE_PATH)/throttle
 
 ifeq ($(OS_NAME), Darwin)
-ANTLR4                 := antlr
+ANTLR4                := antlr
 else ifeq ($(OS_NAME), Linux)
-ANTLR4                 := java -Xmx500m -cp "jars/antlr-4.13.2-complete.jar:CLASSPATH" org.antlr.v4.Tool
+ANTLR4                := java -Xmx500m -cp "jars/antlr-4.13.2-complete.jar:CLASSPATH" org.antlr.v4.Tool
 else
-ANTLR4                 := "Unknown operating system name: $(OS_NAME)"
+ANTLR4                := "Unknown operating system name: $(OS_NAME)"
 endif
 
 all: build
-	@echo "DST_JOB_PATH" $(DST_JOB_PATH)
-	@echo "SRC_EXAMPLE_PATH" $(SRC_EXAMPLE_PATH)
-	@echo "SRC_EXAMPLE_BASE" $(SRC_EXAMPLE_BASE)
-	@echo "SRC_EXAMPLE_DIR" $(SRC_EXAMPLE_DIR)
-	@echo "DST_EXAMPLE_BASE" $(DST_EXAMPLE_BASE)
-	@echo "DST_EXAMPLE_PATH" $(DST_EXAMPLE_PATH)
+	@echo "JOB_DIR" $(JOB_DIR)
+	@echo "JOB_PATH" $(JOB_PATH)
+	@echo "EXAMPLE_PATH" $(EXAMPLE_PATH)
+	@echo "EXAMPLE_BASE" $(EXAMPLE_BASE)
+	@echo "EXAMPLE_DIR" $(EXAMPLE_DIR)
 
 example: build generate run
 
 generate:
-	cp -f cmd/datagen/generator $(DST_EXAMPLE_PATH)
-	cd $(DST_EXAMPLE_PATH); ./prep.sh
+	cp -f cmd/datagen/generator $(JOB_PATH)
+	cd $(JOB_PATH); ./prep.sh
 
 run:
 	@cat $(JOB_DATA) | $(THROTTLE) --milliseconds 100 --append-timestamp false | $(ENGINE) -p $(PLANB) -x $(EXIT_AFTER_SECONDS) 2>> $(LOG)
@@ -140,9 +127,8 @@ mini_build:
 	go build -o $(COMPILER) $(COMPILER_PATH)/main.go
 
 prepare:
-	mkdir -p $(JOBS_PATH)
-	cp -r $(SRC_EXAMPLE_PATH) $(JOBS_PATH)
-	mkdir -p $(JOB_PATH)
+	mkdir -p $(JOB_DIR)
+	cp -r $(EXAMPLE_PATH) $(JOB_DIR)
 	mkdir -p $(CAPNP_PATH)
 	mkdir -p $(OUT_PATH)
 	mkdir -p $(FUNCTIONS_PATH)
@@ -179,15 +165,15 @@ build_engine:
 	@cat $(CATALOGB) | $(CATALOG) -i capnp -o json -t $(CSV_TEMPLATE_PATH) 2>> $(LOG) > $(CATALOGJ)
 	mkdir -p $(PLAN_PATH)
 	@cat $(EXAMPLE_QUERY_PATH) | $(COMPILER) compile > $(PLANB) 2>> $(LOG)
-	cp $(PLANB) $(JOB_PATH)
+	cp $(PLANB) $(JOB_DIR)
 	gofmt -w $(FUNCTIONS_PATH)/functions.go
 	@cat $(PLANB) | $(COMPILER) show > $(PLANJ)
-	cp $(PLANJ) $(JOB_PATH)
+	cp $(PLANJ) $(JOB_DIR)
 #	@cat $(PLANJ) | jq '.' --indent 4
 	cd capnp/data; go generate
 	go build $(FUNCTIONS_PATH)/functions.go
 	go build -o $(ENGINE) $(ENGINE_PATH)/main.go
-	cp $(ENGINE) $(JOB_PATH)
+	cp $(ENGINE) $(JOB_DIR)
 	go mod tidy
 
 build_datagen:
@@ -222,31 +208,6 @@ run_fast:
 clean_log:
 	rm -f $(LOG)
 
-clean:
-	rm -rf .antlr
-	rm -f *.log
-	rm -f $(LOG)
-	rm -f $(CATALOG)
-	rm -f $(COMPILER)
-	rm -f $(ENGINE)
-	rm -f cmd/datagen/generator
-	rm -f cmd/throttle/throttle
-	rm -f cmd/tools/reverse/reverse
-	rm -f go.mod
-	rm -f go.sum
-	rm -f go.work.sum
-	rm -rf $(DST_JOB_PATH)
-	rm -rf $(JOBS_PATH)
-	rm -rf $(PKG_OUT_PATH)
-	rm -rf $(CAPNP_PATH)/go-capnproto2
-	rm -rf $(OUT_PATH)
-	rm -f ./capnp/books/*.capnp.go
-	rm -f ./capnp/data/data.capnp
-	rm -f ./capnp/data/*.capnp.go
-	rm -f ./capnp/foo/*.capnp.go
-	rm -f ./capnp/fluid/*.capnp.go
-	rm -f ./capnp/person/*.capnp.go
-
 showc: # Show catalog
 	@cat $(CATALOGB) | $(CATALOG) -i capnp -o json | jq '.' --tab
 
@@ -267,3 +228,27 @@ justrun:
 
 test:
 	go test -v
+
+clean:
+	rm -rf .antlr
+	rm -f *.log
+	rm -f $(LOG)
+	rm -f $(CATALOG)
+	rm -f $(COMPILER)
+	rm -f $(ENGINE)
+	rm -f cmd/datagen/generator
+	rm -f cmd/throttle/throttle
+	rm -f cmd/tools/reverse/reverse
+	rm -f go.mod
+	rm -f go.sum
+	rm -f go.work.sum
+	rm -rf $(JOB_DIR)
+	rm -rf $(PKG_OUT_PATH)
+	rm -rf $(CAPNP_PATH)/go-capnproto2
+	rm -rf $(OUT_PATH)
+	rm -f ./capnp/books/*.capnp.go
+	rm -f ./capnp/data/data.capnp
+	rm -f ./capnp/data/*.capnp.go
+	rm -f ./capnp/foo/*.capnp.go
+	rm -f ./capnp/fluid/*.capnp.go
+	rm -f ./capnp/person/*.capnp.go
