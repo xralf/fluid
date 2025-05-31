@@ -46,7 +46,7 @@ func init() {
 		AddSource: true,
 		Level:     slog.LevelDebug,
 	}))
-	logger.Info("Compiler says welcome!")
+	logger.Info("Compiler says welb vcome!")
 }
 
 func main() {

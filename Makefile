@@ -242,7 +242,7 @@ clean:
 	rm -f go.mod
 	rm -f go.sum
 	rm -f go.work.sum
-	rm -rf $(JOB_DIR)
+#	rm -rf $(JOB_DIR)
 	rm -rf $(PKG_OUT_PATH)
 	rm -rf $(CAPNP_PATH)/go-capnproto2
 	rm -rf $(OUT_PATH)
