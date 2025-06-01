@@ -90,14 +90,14 @@ else
 ANTLR4                := "Unknown operating system name: $(OS_NAME)"
 endif
 
-all: build
+all: clean build
 	@echo "JOB_DIR" $(JOB_DIR)
 	@echo "JOB_PATH" $(JOB_PATH)
 	@echo "EXAMPLE_PATH" $(EXAMPLE_PATH)
 	@echo "EXAMPLE_BASE" $(EXAMPLE_BASE)
 	@echo "EXAMPLE_DIR" $(EXAMPLE_DIR)
 
-example:generate run
+example: copy_job build_engine generate run
 
 copy_job:
 	mkdir -p $(JOB_DIR)
@@ -110,7 +110,7 @@ generate:
 run:
 	@cat $(JOB_DATA) | $(THROTTLE) --milliseconds 100 --append-timestamp false | $(ENGINE) -p $(PLANB) -x $(EXIT_AFTER_SECONDS) 2>> $(LOG)
 
-build: clean prepare build_compiler build_datagen build_throttle build_reverse copy_job build_engine
+build: prepare build_compiler build_datagen build_throttle build_reverse
 
 #again: clean_log mini_build run
 
@@ -132,7 +132,7 @@ mini_build:
 
 prepare:
 	mkdir -p $(JOB_DIR)
-#	cp -r $(EXAMPLE_PATH) $(JOB_DIR)
+	cp -r $(EXAMPLE_PATH) $(JOB_DIR)
 	mkdir -p $(CAPNP_PATH)
 	mkdir -p $(OUT_PATH)
 	mkdir -p $(FUNCTIONS_PATH)
@@ -222,10 +222,10 @@ tiny:
 	./$(ENGINE) tiny > $(PLAN_PATH)/tiny.bin
 	cat $(PLAN_PATH)/tiny.bin | ./$(ENGINE) show
 
-example:
-	mkdir -p $(PLAN_PATH)
-	$(ENGINE) example > $(PLAN_PATH)/example.bin
-	cat $(PLAN_PATH)/example.bin | $(ENGINE) show | jq .
+# example:
+# 	mkdir -p $(PLAN_PATH)
+# 	$(ENGINE) example > $(PLAN_PATH)/example.bin
+# 	cat $(PLAN_PATH)/example.bin | $(ENGINE) show | jq .
 
 justrun:
 	echo $(QUERY) | ./$(COMPILER) compile | $(ENGINE_PATH)/$(ENGINE) example
