@@ -90,14 +90,14 @@ else
 ANTLR4                := "Unknown operating system name: $(OS_NAME)"
 endif
 
-all: build
+all: clean build
 	@echo "JOB_DIR" $(JOB_DIR)
 	@echo "JOB_PATH" $(JOB_PATH)
 	@echo "EXAMPLE_PATH" $(EXAMPLE_PATH)
 	@echo "EXAMPLE_BASE" $(EXAMPLE_BASE)
 	@echo "EXAMPLE_DIR" $(EXAMPLE_DIR)
 
-example:generate run
+example: copy_job build_engine generate run
 
 copy_job:
 	mkdir -p $(JOB_DIR)
@@ -110,7 +110,7 @@ generate:
 run:
 	@cat $(JOB_DATA) | $(THROTTLE) --milliseconds 100 --append-timestamp false | $(ENGINE) -p $(PLANB) -x $(EXIT_AFTER_SECONDS) 2>> $(LOG)
 
-build: clean prepare build_compiler build_datagen build_throttle build_reverse copy_job build_engine
+build: prepare build_compiler build_datagen build_throttle build_reverse
 
 #again: clean_log mini_build run
 
@@ -132,7 +132,7 @@ mini_build:
 
 prepare:
 	mkdir -p $(JOB_DIR)
-#	cp -r $(EXAMPLE_PATH) $(JOB_DIR)
+	cp -r $(EXAMPLE_PATH) $(JOB_DIR)
 	mkdir -p $(CAPNP_PATH)
 	mkdir -p $(OUT_PATH)
 	mkdir -p $(FUNCTIONS_PATH)
@@ -151,6 +151,15 @@ prepare:
 	cd capnp/fluid; go generate
 	go mod edit -require=$(REPO)/capnp/data@v0.0.0-unpublished
 	go mod edit -replace=$(REPO)/capnp/data@v0.0.0-unpublished=./capnp/data
+
+build_datagen:
+	go build -o cmd/datagen/generator cmd/datagen/main.go
+
+build_throttle:
+	go build -o cmd/throttle/throttle cmd/throttle/main.go
+
+build_reverse:
+	go build -o cmd/tools/reverse cmd/tools/reverse/reverse.go
 
 build_compiler:
 	$(ANTLR4) -Dlanguage=Go -o $(QUERY_PATH) $(GRAMMAR_QUERY).g4
@@ -179,15 +188,6 @@ build_engine:
 	go build -o $(ENGINE) $(ENGINE_PATH)/main.go
 	cp $(ENGINE) $(JOB_DIR)
 	go mod tidy
-
-build_datagen:
-	go build -o cmd/datagen/generator cmd/datagen/main.go
-
-build_throttle:
-	go build -o cmd/throttle/throttle cmd/throttle/main.go
-
-build_reverse:
-	go build -o cmd/tools/reverse cmd/tools/reverse/reverse.go
 
 run2:
 #	@cat $(TABLE_NAME_CSV) | $(ENGINE) -p $(PLANB) 2>> $(LOG)
