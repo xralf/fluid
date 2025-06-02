@@ -1,0 +1,84 @@
+<!-- websockets.html -->
+<html>
+  <head>
+    <style>
+      p {
+        margin: 0 0 10px 0;
+      }
+      html {
+        box-sizing: border-box;
+        font-family: "andale mono", monospace;
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+      html,
+      body {
+        background: gray;
+        color: white;
+        margin: 10;
+        padding: 5;
+      }
+      .wrap {
+        margin: 10px;
+        display: flex;
+        min-height: 90vh;
+        align-items: flex-start;
+        font-family: "andale mono", monospace;
+      }
+      .sticky {
+        position: sticky;
+        top: 0;
+        height: 90vh;
+        overflow: scroll;
+        width: 45%;
+        border: 2px solid gray;
+        padding: 10px;
+      }
+      .main {
+        flex: 1 0 0;
+        border: 5px solid green;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>STREAMS</h1>
+    <div class="wrap">
+      <div class="sticky lside" id="output1">
+        <script>
+          var output1 = document.getElementById("output1");
+          var socket1 = new WebSocket("ws://localhost:@@@PORT1@@@/out");
+          socket1.onopen = function () {
+            output1.innerHTML =
+              "<p>Status: Connected</p>\n" + output1.innerHTML;
+          };
+          socket1.onmessage = function (e) {
+            var now = Date.now().toString();
+            output1.innerHTML =
+              "<p>Server: " +
+              now +
+              ": " +
+              e.data +
+              "</p>\n" +
+              output1.innerHTML;
+          };
+        </script>
+      </div>
+      <div class="sticky rside" id="output2">
+        <script>
+          var output2 = document.getElementById("output2");
+          var socket2 = new WebSocket("ws://localhost:@@@PORT2@@@/out");
+          socket2.onopen = function () {
+            output2.innerHTML += "<p>Status: Connected</p>\n";
+          };
+          socket2.onmessage = function (e) {
+            output2.innerHTML += "<p>Server: " + e.data + "</p>\n";
+          };
+        </script>
+      </div>
+    </div>
+  </body>
+</html>

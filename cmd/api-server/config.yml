@@ -1,0 +1,11 @@
+database:
+  url: "mongodb://localhost:27017"
+  dbname: "fluiddb"
+  collection: "applications"
+
+server:
+  port: "9001"
+
+app:
+  name: "fluid"
+  timeout: 3000

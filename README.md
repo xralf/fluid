@@ -8,7 +8,7 @@ Fluid is a small **data stream processor** that aggregates and filters time-stam
 - writes results to `stdout`, and
 - logs errors and status information to `stderr`.
 
-This repository contains the code to build the compiler and engine, i.e., the core tool to manage data streams. Docker deployment, tools and examples that help playing with Fluid can be found in the [fluid-portal](http://github.com/xralf/fluid) repository.
+This repository contains the code to build the compiler and engine, i.e., the core tool to manage data streams. Docker deployment, tools and examples that help playing with Fluid can be found in the [fluid](http://github.com/xralf/fluid) repository.
 
 ## Motivation
 
@@ -65,7 +65,7 @@ make syslog-example
 
 ## Example
 
-With the _fluid-portal Query Language_ (FQL) we can specify a task in an intuitve manner. Imagine, we want to process time-stamped CSV data like the following from the file [foo.csv](data/foo.csv):
+With the _Fluid Query Language_ (FQL) we can specify a task in an intuitve manner. Imagine, we want to process time-stamped CSV data like the following from the file [foo.csv](data/foo.csv):
 
 |   x |             t             |
 | --: | :-----------------------: |
@@ -334,7 +334,7 @@ We use data structures called _operators_ that form a pipelined execution plan l
 
 > One of my original aims of the design was to have each operator run in a different thread and/or perhaps on different compute nodes. This is a linear pipeline but certainly sharding and other data distribution techniques are thinkable for the future that would make such a pipeline more bushy.
 
-The correspondencs between fluid-portal query clauses and Fluid plan operators are shown below:
+The correspondencs between fluid query clauses and Fluid plan operators are shown below:
 
 | Query clause | Plan operator | Description                                                   |
 | ------------ | ------------- | ------------------------------------------------------------- |

@@ -1,0 +1,21 @@
+database:
+  url: "mongodb://localhost:27017"
+  dbname: "fluiddb"
+  collection: "applications"
+
+server:
+  port: "50001"
+
+app:
+  name: "fluid"
+  timeout: 3000
+  webSocketURLPrefix: "ws://"
+  dashboardTemplateFile: "dashboard-template.html"
+  webSocketClientBinary: "ws-pipe-client"
+  webSocketServerBinary: "ws-pipe-server"
+  dashboardBinary: "ws-pipe-webserver"
+  dashboardPort: 50002
+  pipe1IngressPort: 50003
+  pipe1EgressPort: 50004
+  pipe2IngressPort: 50005
+  pipe2EgressPort: 50006

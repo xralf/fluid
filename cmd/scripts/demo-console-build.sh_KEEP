@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/#!/usr/bin/env bash
 
 EXAMPLE=$1
 JOB_PATH=/tmp/jobs/${EXAMPLE}

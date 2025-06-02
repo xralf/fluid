@@ -233,26 +233,81 @@ justrun:
 test:
 	go test -v
 
-clean:
-	rm -rf .antlr
+# -------------------------------------------------------------------
+# DEMO
+# -------------------------------------------------------------------
+
+demo-build:
+	go build -o cmd/api-server/api-server cmd/api-server/server.go
+	go build -o cmd/pipe/server/server cmd/pipe/server/server.go
+	go build -o cmd/pipe/client/client cmd/pipe/client/client.go
+	go build -o cmd/demo/web/server cmd/demo/web/server.go
+	go build -o cmd/demo/client/client cmd/demo/client/client.go
+	go build -o cmd/finnhub-trades/finnhub-trades cmd/finnhub-trades/main.go
+	go build -o cmd/syslog/syslog cmd/syslog/main.go
+	go build -o cmd/throttle/throttle cmd/throttle/main.go
+	go build -o cmd/datagen/generator cmd/datagen/main.go
+	mkdir -p /tmp/demo
+	cp -f cmd/pipe/client/client /tmp/demo/demo-pipe-client
+	cp -f cmd/pipe/server/server /tmp/demo/demo-pipe-server
+	cp -f cmd/demo/web/server /tmp/demo/demo-web-server
+	cp -f cmd/demo/client/client /tmp/demo/demo-console-client
+	cp -f cmd/finnhub-trades/finnhub-trades /tmp/demo/demo-findata-server
+	cp -f cmd/syslog/syslog /tmp/demo/syslog
+	cp -f cmd/throttle/throttle /tmp/demo/throttle
+	cp -f cmd/datagen/generator /tmp/demo/generator
+	cp -rf templates /tmp/demo
+	cp -f ./config.yml /tmp/demo
+
+demo-stop:
+	if pgrep demo; then pkill demo; fi
+	if pgrep fluid; then pkill fluid; fi
+	if pgrep api-server; then pkill api-server; fi
+
+demo-status:
+	ps -ef | grep fluid
+	ps -ef | grep demo
+	ps -ef | grep api-server
+
+demo-clean:
+	rm -f cmd/pipe/server/server
+	rm -f cmd/pipe/client/client
+	rm -f cmd/demo/web/server
+	rm -f cmd/demo/client/client
+	rm -rf repos
+	rm -rf tmp
+
+# -------------------------------------------------------------------
+# CLEAN
+# -------------------------------------------------------------------
+clean: demo-clean
+	rm -f go.mod
+	rm -f go.sum
+	rm -f go.work.sum
 	rm -f *.log
 	rm -f $(LOG)
 	rm -f $(CATALOG)
 	rm -f $(COMPILER)
 	rm -f $(ENGINE)
+	rm -f cmd/api-server/api-server
+	rm -f cmd/demo/client/api-client
+	rm -f cmd/demo/web/ws-pipe-webserver
 	rm -f cmd/datagen/generator
-	rm -f cmd/throttle/throttle
+	rm -f cmd/finnhub-trades/finnhub-trades
 	rm -f cmd/tools/reverse/reverse
-	rm -f go.mod
-	rm -f go.sum
-	rm -f go.work.sum
-#	rm -rf $(JOB_DIR)
-	rm -rf $(PKG_OUT_PATH)
-	rm -rf $(CAPNP_PATH)/go-capnproto2
-	rm -rf $(OUT_PATH)
+	rm -f cmd/throttle/throttle
+	rm -f cmd/syslog/syslog
 	rm -f ./capnp/books/*.capnp.go
 	rm -f ./capnp/data/data.capnp
 	rm -f ./capnp/data/*.capnp.go
 	rm -f ./capnp/foo/*.capnp.go
 	rm -f ./capnp/fluid/*.capnp.go
 	rm -f ./capnp/person/*.capnp.go
+	rm -rf .antlr
+	rm -rf $(PKG_OUT_PATH)
+	rm -rf $(CAPNP_PATH)/go-capnproto2
+	rm -rf $(OUT_PATH)
+	rm -rf /tmp/demo
+	rm -rf /tmp/jobs
+	rm -rf /tmp/uploads
+#	rm -rf $(JOB_DIR)
