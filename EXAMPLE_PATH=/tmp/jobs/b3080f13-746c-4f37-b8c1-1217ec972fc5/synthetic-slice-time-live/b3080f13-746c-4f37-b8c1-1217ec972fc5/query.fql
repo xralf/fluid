@@ -1,0 +1,7 @@
+from instance1.database1.schema1.table1
+group by g2, g1
+where a > 0
+window slice 2 seconds
+aggregate count(a) as aCount, avg(a) as aAvg, avg(b) as bAvg, sum(a) as aSum, first(c) as cFirst, last(c) as cLast, first(t2) as t2First, last(t2) as t2Last, first(rowid) as rowidFirst, last(rowid) as rowidLast, count(one) as oneCount, sum(one) as oneSum
+append t2First, t2Last, aCount, aSum, aAvg, bAvg, oneCount, oneSum, cFirst, cLast, rowidFirst, rowidLast
+to instance1.database1.schema1.table2

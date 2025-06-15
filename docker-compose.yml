@@ -1,0 +1,11 @@
+services:
+  fluid:
+    build:
+      context: .
+      dockerfile: ./dockerfile-fluid
+    container_name: fluid-fluid
+    ports:
+      - 50001-50099:50001-50099
+    restart: on-failure
+    env_file:
+      - .env

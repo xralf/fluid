@@ -1,0 +1,1 @@
+{"time":"2025-06-05T16:22:17.559614-07:00","level":"INFO","source":{"function":"github.com/xralf/fluid/pkg/datagen.init.0","file":"/Users/ralf/git/xralf/fluid/pkg/datagen/datagen.go","line":90},"msg":"Data Generator says welcome!"}

@@ -1,0 +1,32 @@
+FROM fluid-base:0.1 as build-env
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . ./
+COPY /repos/ /tmp/repos/
+RUN rm -rf repos
+RUN go build -o /fluid github.com/xralf/fluid/cmd/api-server
+#RUN go build -o /chatty github.com/xralf/fluid/cmd/chatty
+RUN	go build -o /tmp/demo/demo-pipe-server github.com/xralf/fluid/cmd/pipe/server
+RUN	go build -o /tmp/demo/demo-pipe-client github.com/xralf/fluid/cmd/pipe/client
+RUN	go build -o /tmp/demo/demo-web-server github.com/xralf/fluid/cmd/demo/web
+RUN	go build -o /tmp/demo/demo-console-client github.com/xralf/fluid/cmd/demo/client
+RUN	go build -o /tmp/demo/demo-findata-server github.com/xralf/fluid/cmd/finnhub-trades
+RUN	go build -o /tmp/demo/syslog github.com/xralf/fluid/cmd/syslog
+RUN	go build -o /tmp/demo/throttle github.com/xralf/fluid/cmd/throttle
+RUN	go build -o /tmp/demo/generator github.com/xralf/fluid/cmd/datagen
+
+COPY /cmd/demo/web/dashboard.html /tmp/demo
+COPY /cmd/demo/web/dashboard-template.html /tmp/demo
+COPY /templates /tmp/demo/templates/
+COPY ./config.yml /tmp/demo
+
+ENV TZ US/Pacific
+
+EXPOSE 50001-50099 3344
+
+WORKDIR /
+
+CMD [ "./fluid" ]

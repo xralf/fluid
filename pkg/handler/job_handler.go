@@ -259,6 +259,7 @@ func (app *jobHandler) Add(c *gin.Context) {
 		logger.Debug("@@@401a")
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
+
 	logger.Debug("@@@401b")
 	if err = copyFile(PrepsDirectoryPath+"/"+job.PrepId+".sh", job.JobDirectoryPath+"/prep.sh", FilePermissionExecutable); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -294,22 +295,25 @@ func (app *jobHandler) Add(c *gin.Context) {
 	// 	c.AbortWithError(http.StatusInternalServerError, err)
 	// }
 
-	logger.Info("@@@300.0")
+	logger.Info("@@@401.0")
 	var statusMsg string
 	if statusMsg, err = prepare(job.JobDirectoryPath); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
-
+	logger.Info("@@@402.0")
 	if statusMsg, err = buildEngine(job.JobDirectoryPath); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
-	logger.Info("@@@300.3")
+	logger.Info("@@@403.0")
 
 	app.cfg.App.JobChan <- job
 
+	logger.Info("@@@404.0")
 	if err = createSampleRunScript(job, templatesDirectoryPath+"/run-console-template.sh", job.JobDirectoryPath+"/run-console.sh", FilePermissionExecutable); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
+	logger.Info("@@@405.0")
+
 	if err = createSampleRunScript(job, templatesDirectoryPath+"/run-dashboard-template.sh", job.JobDirectoryPath+"/run-dashboard.sh", FilePermissionExecutable); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
@@ -336,8 +340,18 @@ func createSampleRunScript(job model.Job, src string, dst string, perm fs.FileMo
 		"dst", dst,
 	)
 
-	logger.Debug(job.SpoutPath)
+	logger.Debug("@@@702",
+		"job.SpoutPath", job.SpoutPath,
+	)
+
+	// logger.Info("EXITING")
+	// os.Exit(1)
+
 	dataSpout := readFile(job.SpoutPath)
+
+	logger.Debug("@@@703",
+		"job.SpoutPath", job.SpoutPath,
+	)
 
 	s := readFile(src)
 	s = strings.Replace(s, "@@@PIPE_1_INGRESS_PORT@@@", strconv.Itoa(job.Pipe1IngressPort), -1)
@@ -515,8 +529,14 @@ func prepare(jobDirectoryPath string) (statusMsg string, err error) {
 
 func buildEngine(jobDirectoryPath string) (statusMsg string, err error) {
 	params := "JOB_DIR=" + jobDirectoryPath
-	cmd := exec.Command("make", "all", params)
-	cmd.Dir = "/tmp/repos/fluid"
+	params += " "
+	params += "EXAMPLE_PATH=" + jobDirectoryPath
+	//params += "EXAMPLE_PATH=" + jobDirectoryPath + "/" + "synthetic-slice-time-live"
+	//cmd := exec.Command("make", "all", params)
+	//cmd := exec.Command("make", "build", params)
+	cmd := exec.Command("make", "full_build", params)
+	//cmd.Dir = "/tmp/repos/fluid"
+	cmd.Dir = "./"
 
 	logger.Info(
 		"@@@1 - buildEngine",
@@ -538,6 +558,8 @@ func buildEngine(jobDirectoryPath string) (statusMsg string, err error) {
 	}
 
 	logger.Info("@@@4")
+	// logger.Info("EXITING")
+	// os.Exit(1)
 	statusMsg = out.String()
 	return
 }

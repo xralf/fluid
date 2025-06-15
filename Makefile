@@ -15,6 +15,9 @@
 ##    EXAMPLE_PATH= JOB_DIR= make all
 ##
 
+EXAMPLE               := synthetic-slice-time-live
+
+
 ##
 ## Some default example source for missing argument
 ##
@@ -90,14 +93,12 @@ else
 ANTLR4                := "Unknown operating system name: $(OS_NAME)"
 endif
 
-all: clean build
+all: clean prepare_example build
 	@echo "JOB_DIR" $(JOB_DIR)
 	@echo "JOB_PATH" $(JOB_PATH)
 	@echo "EXAMPLE_PATH" $(EXAMPLE_PATH)
 	@echo "EXAMPLE_BASE" $(EXAMPLE_BASE)
 	@echo "EXAMPLE_DIR" $(EXAMPLE_DIR)
-
-example: copy_job build_engine generate run
 
 copy_job:
 	mkdir -p $(JOB_DIR)
@@ -111,6 +112,9 @@ run:
 	@cat $(JOB_DATA) | $(THROTTLE) --milliseconds 100 --append-timestamp false | $(ENGINE) -p $(PLANB) -x $(EXIT_AFTER_SECONDS) 2>> $(LOG)
 
 build: prepare build_compiler build_datagen build_throttle build_reverse
+
+full_build: prepare build_compiler build_datagen build_throttle build_reverse build_engine
+
 
 #again: clean_log mini_build run
 
@@ -130,9 +134,11 @@ mini_build:
 	go build -o $(CATALOG) $(CATALOG_PATH)/main.go
 	go build -o $(COMPILER) $(COMPILER_PATH)/main.go
 
-prepare:
+prepare_example:
 	mkdir -p $(JOB_DIR)
 	cp -r $(EXAMPLE_PATH) $(JOB_DIR)
+
+prepare:
 	mkdir -p $(CAPNP_PATH)
 	mkdir -p $(OUT_PATH)
 	mkdir -p $(FUNCTIONS_PATH)
@@ -140,6 +146,7 @@ prepare:
 	mkdir -p $(PLAN_PATH)
 	mkdir -p $(CSV_DATA_PATH)
 	mkdir -p $(CSV_TEMPLATE_PATH)
+	rm -f go.mod
 	go mod init $(REPO)
 #	go mod tidy
 	go get github.com/antlr4-go/antlr/v4
@@ -147,6 +154,7 @@ prepare:
 	go get capnproto.org/go/capnp/v3
 	go install capnproto.org/go/capnp/v3/capnpc-go@latest
 	go get github.com/DataDog/hyperloglog
+	rm -rf $(CAPNP_PATH)/go-capnproto2
 	cd $(CAPNP_PATH); git clone https://github.com/capnproto/go-capnproto2.git
 	cd capnp/fluid; go generate
 	go mod edit -require=$(REPO)/capnp/data@v0.0.0-unpublished
@@ -234,10 +242,34 @@ test:
 	go test -v
 
 # -------------------------------------------------------------------
-# DEMO
+# DEMOS:
+#
+# - DEMO 1:  Run in 1 terminal:
+#   make example
+#
+# - DEMO 2:   Run in browser, needs 2 terminals:
+#   1.  Terminal 1:		make demo-browser-server-start
+#   2.  Terminal 2:		make demo-browser-client-start
+#   3.  Any terminal:	make demo-stop
+#
 # -------------------------------------------------------------------
 
+# -------------------------------------------------------------------
+# EXAMPLE
+# -------------------------------------------------------------------
+example: copy_job build_engine generate run
+
+demo1: example
+
+# -------------------------------------------------------------------
 demo-build:
+#	go mod tidy
+	go get github.com/spf13/viper
+	go get github.com/gin-gonic/gin
+	go get github.com/gin-gonic/gin/binding
+	go get github.com/google/uuid
+	go get github.com/gorilla/websocket
+	go get github.com/MaxSchaefer/macos-log-stream/pkg/mls
 	go build -o cmd/api-server/api-server cmd/api-server/server.go
 	go build -o cmd/pipe/server/server cmd/pipe/server/server.go
 	go build -o cmd/pipe/client/client cmd/pipe/client/client.go
@@ -268,6 +300,9 @@ demo-status:
 	ps -ef | grep fluid
 	ps -ef | grep demo
 	ps -ef | grep api-server
+	pgrep fluid
+	pgrep demo
+	pgrep api-server
 
 demo-clean:
 	rm -f cmd/pipe/server/server
@@ -276,6 +311,65 @@ demo-clean:
 	rm -f cmd/demo/client/client
 	rm -rf repos
 	rm -rf tmp
+
+copy-repos:
+	rm -rf repos
+	rm -rf /tmp/repos
+	mkdir -p /tmp/repos
+#	rsync -avh ../fluid-portal /tmp/repos
+	rsync -avh ../fluid /tmp/repos
+	rsync -avh /tmp/repos .
+
+remove-local-repos:
+	rm -rf repos
+
+run-api-server:
+#	go build -o ./fluid-portal github.com/xralf/fluid-portal/cmd/api-server
+#	go run github.com/xralf/fluid-portal/cmd/api-server
+	./cmd/api-server/api-server
+
+run-api-client:
+#	go run cmd/demo/client/client.go
+	./cmd/demo/client/api-client
+
+run-api-curls:
+	./cmd/scripts/run-api-curls.sh
+
+# -------------------------------------------------------------------
+# CONSOLE DEMO in one terminal
+#
+#   make demo-console
+# -------------------------------------------------------------------
+demo-console: demo-console-build demo-console-run
+
+demo-console-build: build copy-repos
+	./cmd/scripts/demo-console-build.sh $(EXAMPLE)
+
+demo-console-run:
+	./cmd/scripts/demo-console-run.sh $(EXAMPLE)
+
+## ------------------------------------------------------------------
+## WEB DEMO from 2 local terminals
+## ------------------------------------------------------------------
+
+##
+## Terminal 1:
+##
+demo-browser-server-start: demo-stop demo-clean demo-build copy-repos run-api-server
+demo-browser-server-stop: demo-stop
+
+##
+## Terminal 2:
+##
+demo-browser-client-start:
+#	go run cmd/demo/client/client.go start examples/$(EXAMPLE)
+#	./cmd/demo/client/client start ../fluid/examples/$(EXAMPLE)
+	./cmd/demo/client/client start examples/$(EXAMPLE)
+
+##
+## Go to browser using the URL shown in Terminal 2.
+##
+
 
 # -------------------------------------------------------------------
 # CLEAN

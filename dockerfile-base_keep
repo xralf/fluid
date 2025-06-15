@@ -1,0 +1,24 @@
+#FROM golang:1.22-alpine
+FROM golang:alpine
+
+RUN apk update && apk upgrade && apk add --no-cache autoconf automake bash capnproto curl make git g++ libtool linux-headers openjdk21 tzdata wget
+RUN mkdir /repos
+WORKDIR /repos
+RUN git clone -b master https://github.com/capnproto/capnproto.git
+
+WORKDIR /repos/capnproto/c++
+RUN autoreconf -i
+RUN ./configure
+RUN make -j4
+RUN make install
+
+WORKDIR /
+RUN rm -rf /repos
+RUN apk del autoconf automake g++ libtool linux-headers
+RUN apk add --no-cache make
+
+##
+## ONLY for debugging purposes:
+## Keep this container running, so we can log in after it started.
+##
+#ENTRYPOINT ["tail", "-f", "/dev/null"]
